@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-brown: #7A4A2A;
+  --color-brand-red:   #B75D4D;
+  --color-brand-dark:  #4E3B3B;
+  --color-brand-cream: #F8E2D1;
+  --font-sans:   var(--font-inter);
+  --font-serif:  var(--font-playfair);
+}
+
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background-color: #1a1614;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 8%  15%, rgba(78,59,59,0.75)  0%, transparent 60%),
+    radial-gradient(ellipse 45% 40% at 92% 78%, rgba(122,74,42,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(183,93,77,0.05) 0%, transparent 70%);
+  min-height: 100vh;
+  color: #F8E2D1;
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── GLASS ── */
+.glass-panel {
+  background:  rgba(255,255,255,0.045);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.4);
+}
+
+/* ── TICKER ANIMATION ── */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 34s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* ── LIVE DOT BLINK ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+.dot-blink { animation: blink 1.4s ease-in-out infinite; }
+
+/* ── AD BUBBLE HOVER ── */
+.ad-bubble {
+  transition: transform 0.32s cubic-bezier(.22,.68,0,1.55), box-shadow 0.32s;
+}
+.ad-bubble:hover {
+  transform: translateY(-5px) scale(1.025);
+  box-shadow: 0 28px 56px rgba(0,0,0,0.5);
+}
+
+/* ── NEWS CARD HOVER ── */
+.news-card {
+  transition: transform 0.3s cubic-bezier(.22,.68,0,1.4);
+}
+.news-card:hover { transform: translateY(-6px); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.modal-box {
+  transform: scale(0.9) translateY(24px);
+  transition: transform 0.42s cubic-bezier(.22,.68,0,1.2);
+}
+.modal-overlay.open .modal-box {
+  transform: scale(1) translateY(0);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(122,74,42,0.3); border-radius: 999px; }
