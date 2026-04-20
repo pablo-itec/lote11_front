@@ -1,0 +1,82 @@
+import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse } from '@/src/types';
+
+const BASE = 'http://localhost:3000/api';
+
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('admin_token');
+}
+
+async function req<T>(method: string, path: string, body?: unknown, isFormData = false): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (!isFormData && body) headers['Content-Type'] = 'application/json';
+
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers,
+    body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  return data as T;
+}
+
+function buildQuery(params: Record<string, unknown>): string {
+  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== '');
+  return new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
+}
+
+export const auth = {
+  setToken: (t: string) => {
+    if (typeof window !== 'undefined') localStorage.setItem('admin_token', t);
+  },
+  clearToken: () => {
+    if (typeof window !== 'undefined') localStorage.removeItem('admin_token');
+  },
+  hasToken: (): boolean => !!getToken(),
+  login: (email: string, password: string) =>
+    req<{ access_token: string }>('POST', '/auth/login', { email, password }),
+};
+
+export const newsApi = {
+  getPublic: (params: Record<string, unknown> = {}) =>
+    req<PaginatedResponse<News>>('GET', `/news?${buildQuery(params)}`),
+  getDetail: (id: number) => req<News>('GET', `/news/${id}`),
+  getAll: (params: Record<string, unknown> = {}) =>
+    req<PaginatedResponse<News>>('GET', `/news/admin/all?${buildQuery(params)}`),
+  create: (formData: FormData) => req<News>('POST', '/news', formData, true),
+  update: (id: number, formData: FormData) => req<News>('PATCH', `/news/${id}`, formData, true),
+  publish: (id: number) => req<News>('PATCH', `/news/${id}/publish`),
+  unpublish: (id: number) => req<News>('PATCH', `/news/${id}/unpublish`),
+  toggleFeatured: (id: number) => req<News>('PATCH', `/news/${id}/featured`),
+  remove: (id: number) => req<void>('DELETE', `/news/${id}`),
+};
+
+export const subscribersApi = {
+  subscribe: (email: string) => req<{ message: string }>('POST', '/subscribers', { email }),
+  unsubscribe: (unsubToken: string) =>
+    req<{ message: string }>('GET', `/subscribers/unsubscribe/${unsubToken}`),
+  getAll: (search?: string, page?: number) =>
+    req<PaginatedResponse<Subscriber>>('GET', `/subscribers?${buildQuery({ search, page })}`),
+  deactivate: (id: number) => req<Subscriber>('PATCH', `/subscribers/${id}/deactivate`),
+};
+
+export const topicsApi = {
+  getAll: () => req<Topic[]>('GET', '/topics'),
+  create: (data: Partial<Topic>) => req<Topic>('POST', '/topics', data),
+  update: (id: number, data: Partial<Topic>) => req<Topic>('PATCH', `/topics/${id}`, data),
+  remove: (id: number) => req<void>('DELETE', `/topics/${id}`),
+};
+
+export const importanceApi = {
+  getAll: () => req<ImportanceLevel[]>('GET', '/importance-levels'),
+  create: (data: Partial<ImportanceLevel>) => req<ImportanceLevel>('POST', '/importance-levels', data),
+  update: (id: number, data: Partial<ImportanceLevel>) =>
+    req<ImportanceLevel>('PATCH', `/importance-levels/${id}`, data),
+  toggleNotify: (id: number) =>
+    req<ImportanceLevel>('PATCH', `/importance-levels/${id}/toggle-notify`),
+  remove: (id: number) => req<void>('DELETE', `/importance-levels/${id}`),
+};

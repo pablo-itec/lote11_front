@@ -1,7 +1,8 @@
 "use client";
-// src/components/layout/Navbar.tsx
 
+import Link from "next/link";
 import { motion } from "framer-motion";
+import { Settings } from "lucide-react";
 
 interface NavbarProps {
   onProfileClick: () => void;
@@ -35,16 +36,29 @@ export default function Navbar({ onProfileClick }: NavbarProps) {
         ))}
       </nav>
 
-      {/* PERFIL */}
-      <motion.button
-        onClick={onProfileClick}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.96 }}
-        className="glass-panel w-16 h-16 md:w-[72px] md:h-[72px] rounded-[22px] flex items-center justify-center flex-shrink-0 cursor-pointer overflow-hidden"
-        aria-label="Ver perfil del editor"
-      >
-        <span className="text-3xl">🧑‍💼</span>
-      </motion.button>
+      {/* ADMIN + PERFIL */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <Link href="/admin">
+          <motion.div
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.96 }}
+            className="glass-panel w-10 h-10 rounded-[14px] flex items-center justify-center text-brand-cream/35 hover:text-brand-brown transition-colors cursor-pointer"
+            title="Panel de administración"
+          >
+            <Settings size={16} />
+          </motion.div>
+        </Link>
+
+        <motion.button
+          onClick={onProfileClick}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.96 }}
+          className="glass-panel w-16 h-16 md:w-[72px] md:h-[72px] rounded-[22px] flex items-center justify-center cursor-pointer overflow-hidden"
+          aria-label="Ver perfil del editor"
+        >
+          <span className="text-3xl">🧑‍💼</span>
+        </motion.button>
+      </div>
     </header>
   );
 }
