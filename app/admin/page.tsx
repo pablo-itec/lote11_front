@@ -1,22 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { auth } from "@/src/lib/api";
-import LoginPanel      from "@/src/components/admin/LoginPanel";
-import AdminDashboard  from "@/src/components/admin/AdminDashboard";
+import AdminDashboard from "@/src/components/admin/AdminDashboard";
 
 export default function AdminPage() {
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
-  const [ready, setReady]       = useState(false);
 
   useEffect(() => {
-    setIsLogged(auth.hasToken());
+    const logged = auth.hasToken();
+    if (!logged) {
+      router.replace("/admin/login");
+    }
+    setIsLogged(logged);
     setReady(true);
-  }, []);
+  }, [router]);
 
-  if (!ready) return null;
+  if (!ready || !isLogged) return null;
 
-  return isLogged
-    ? <AdminDashboard onLogout={() => setIsLogged(false)} />
-    : <LoginPanel onLogin={() => setIsLogged(true)} />;
+  return <AdminDashboard onLogout={() => router.replace("/admin/login")} />;
 }

@@ -20,7 +20,10 @@ async function req<T>(method: string, path: string, body?: unknown, isFormData =
   });
 
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  if (!res.ok) {
+    if (res.status === 401) auth.clearToken();
+    throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  }
   return data as T;
 }
 
