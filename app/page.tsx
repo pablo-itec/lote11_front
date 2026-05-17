@@ -97,61 +97,51 @@ export default function Home() {
       </div>
 
       {/*
-        ── MAIN LAYOUT ──
-        Mobile:  columna única
-        Desktop: 3 columnas [ads | contenido | banner]
+        ── SIDE RAILS (fixed, sticky-to-viewport) ──
+        Visibles sólo en pantallas >= 1400px para que no pisen el contenido.
       */}
-      <div className="
-        max-w-[1400px] mx-auto
-        px-0
-        grid gap-3
-        grid-cols-1
-        xl:grid-cols-[200px_1fr_185px]
-        xl:px-0
-      ">
+      <aside className="side-rail side-rail-left hidden min-[1400px]:block" aria-label="Publicidad lateral izquierda">
+        <AdBubbles />
+      </aside>
+      <aside className="side-rail side-rail-right hidden min-[1400px]:block" aria-label="Publicidad lateral derecha">
+        <AdBanner />
+      </aside>
 
-        {/* SIDEBAR IZQ */}
-        <div className="hidden xl:block pl-3">
-          <div className="sticky top-[100px]">
-            <AdBubbles />
-          </div>
+      {/*
+        ── CONTENIDO CENTRAL ──
+        En pantallas chicas mostramos los ads inline al final.
+      */}
+      <div className="max-w-[1080px] mx-auto px-5 flex flex-col gap-3">
+        <HeroSection news={heroNews} onReadMore={openDetail} />
+
+        <SearchFilters
+          topics={topics}
+          importanceLevels={importanceLevels}
+          onSearch={handleSearch}
+          onTopicChange={handleTopic}
+          onImportanceChange={handleImp}
+        />
+
+        <NewsGrid
+          news={loading ? undefined : newsList}
+          loading={loading}
+          onNewsClick={openDetail}
+        />
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPrev={() => setPage((p) => p - 1)}
+          onNext={() => setPage((p) => p + 1)}
+        />
+
+        <SubscribeSection />
+
+        {/* Fallback de ads en pantallas chicas (< 1400px) */}
+        <div className="min-[1400px]:hidden grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <AdBubbles />
+          <AdBanner />
         </div>
-
-        {/* CONTENIDO CENTRAL */}
-        <div className="flex flex-col gap-3 px-5 xl:px-0">
-          <HeroSection news={heroNews} onReadMore={openDetail} />
-
-          <SearchFilters
-            topics={topics}
-            importanceLevels={importanceLevels}
-            onSearch={handleSearch}
-            onTopicChange={handleTopic}
-            onImportanceChange={handleImp}
-          />
-
-          <NewsGrid
-            news={loading ? undefined : newsList}
-            loading={loading}
-            onNewsClick={openDetail}
-          />
-
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPrev={() => setPage((p) => p - 1)}
-            onNext={() => setPage((p) => p + 1)}
-          />
-
-          <SubscribeSection />
-        </div>
-
-        {/* SIDEBAR DER */}
-        <div className="hidden xl:block pr-3">
-          <div className="sticky top-[100px]">
-            <AdBanner />
-          </div>
-        </div>
-
       </div>
 
       {/* ── FOOTER ── */}

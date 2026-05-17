@@ -108,9 +108,9 @@ export default function NewsDetailModal({ news, onClose }: Props) {
               <div className="h-px bg-white/[0.06] mb-7" />
 
               {/* Body */}
-              <p className="text-[13px] text-brand-cream/65 leading-[1.85] whitespace-pre-wrap">
+              <div className="text-[14px] text-brand-cream/80 leading-[1.85] whitespace-pre-wrap drop-cap">
                 {news.body}
-              </p>
+              </div>
 
               {/* Tags */}
               {news.tags && news.tags.length > 0 && (
