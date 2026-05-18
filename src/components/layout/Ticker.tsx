@@ -1,6 +1,9 @@
 "use client";
 // src/components/layout/Ticker.tsx
 
+import { motion } from "framer-motion";
+import { useState } from "react";
+
 const ITEMS = [
   { label: "NUEVO EP. 12 — INVERSIONES 2026", pip: "red" },
   { label: "PALERMO SOHO +18% YTD",           pip: "brown" },
@@ -19,9 +22,11 @@ const PIP: Record<string, string> = {
   dim:   "bg-brand-cream/20",
 };
 
+const DURATION = 34;
+
 export default function Ticker() {
-  // Duplicamos para el loop infinito CSS
   const doubled = [...ITEMS, ...ITEMS];
+  const [paused, setPaused] = useState(false);
 
   return (
     <div className="relative h-[42px] rounded-full flex items-center overflow-hidden glass-panel">
@@ -36,18 +41,27 @@ export default function Ticker() {
       <div className="absolute left-[100px] w-8 h-full bg-gradient-to-r from-[#1a1614]/80 to-transparent pointer-events-none z-[1]" />
 
       {/* Track */}
-      <div className="flex-1 overflow-hidden h-full flex items-center">
-        <div className="ticker-track flex items-center whitespace-nowrap">
+      <div
+        className="flex-1 overflow-hidden h-full flex items-center"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <motion.div
+          className="flex items-center whitespace-nowrap"
+          animate={{ x: paused ? undefined : ["0%", "-50%"] }}
+          transition={{ duration: DURATION, ease: "linear", repeat: Infinity }}
+          style={{ willChange: "transform" }}
+        >
           {doubled.map((item, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-2 px-5 text-[9px] font-bold tracking-[0.16em] text-brand-cream/45 uppercase border-r border-brand-cream/[0.07] h-[42px] cursor-pointer hover:text-brand-cream transition-colors flex-shrink-0"
+              className="inline-flex items-center gap-2 px-5 text-[9px] font-bold tracking-[0.16em] text-brand-cream/55 uppercase border-r border-brand-cream/[0.07] h-[42px] cursor-pointer hover:text-brand-cream transition-colors flex-shrink-0"
             >
               <span className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${PIP[item.pip]}`} />
               {item.label}
             </span>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* Fade derecho */}

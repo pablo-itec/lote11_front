@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 import Navbar           from "@/src/components/layout/Navbar";
 import Ticker           from "@/src/components/layout/Ticker";
@@ -83,6 +83,42 @@ export default function Home() {
   const handleTopic  = (t: string) => { setTopicId(t); setPage(1); };
   const handleImp    = (i: string) => { setImportanceId(i); setPage(1); };
 
+  // Side rails: fijos en pantalla pero chocan contra el footer (no lo tapan)
+  const footerRef = useRef<HTMLDivElement>(null);
+  const leftRailRef = useRef<HTMLDivElement>(null);
+  const rightRailRef = useRef<HTMLDivElement>(null);
+  const [leftTop, setLeftTop] = useState(110);
+  const [rightTop, setRightTop] = useState(110);
+
+  useEffect(() => {
+    const BASE_TOP = 110;
+    const GAP = 16;
+    let raf = 0;
+
+    const compute = () => {
+      const footer = footerRef.current?.getBoundingClientRect();
+      if (!footer) return;
+      const leftH = leftRailRef.current?.offsetHeight ?? 0;
+      const rightH = rightRailRef.current?.offsetHeight ?? 0;
+      setLeftTop(Math.min(BASE_TOP, footer.top - leftH - GAP));
+      setRightTop(Math.min(BASE_TOP, footer.top - rightH - GAP));
+    };
+
+    const onScroll = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(compute);
+    };
+
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <>
       {/* ── NAV ── */}
@@ -92,7 +128,7 @@ export default function Home() {
       <div className="h-[100px]" />
 
       {/* ── TICKER ── */}
-      <div className="px-5 mb-3">
+      <div className="max-w-[1080px] mx-auto px-5 mb-3">
         <Ticker />
       </div>
 
@@ -100,11 +136,23 @@ export default function Home() {
         ── SIDE RAILS (fixed, sticky-to-viewport) ──
         Visibles sólo en pantallas >= 1400px para que no pisen el contenido.
       */}
-      <aside className="side-rail side-rail-left hidden min-[1400px]:block" aria-label="Publicidad lateral izquierda">
-        <AdBubbles />
+      <aside
+        className="side-rail side-rail-left hidden min-[1400px]:block"
+        style={{ top: `${leftTop}px` }}
+        aria-label="Publicidad lateral izquierda"
+      >
+        <div ref={leftRailRef}>
+          <AdBubbles />
+        </div>
       </aside>
-      <aside className="side-rail side-rail-right hidden min-[1400px]:block" aria-label="Publicidad lateral derecha">
-        <AdBanner />
+      <aside
+        className="side-rail side-rail-right hidden min-[1400px]:block"
+        style={{ top: `${rightTop}px` }}
+        aria-label="Publicidad lateral derecha"
+      >
+        <div ref={rightRailRef}>
+          <AdBanner />
+        </div>
       </aside>
 
       {/*
@@ -145,7 +193,9 @@ export default function Home() {
       </div>
 
       {/* ── FOOTER ── */}
-      <Footer />
+      <div ref={footerRef}>
+        <Footer />
+      </div>
 
       {/* ── MODALS ── */}
       <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />

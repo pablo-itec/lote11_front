@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Settings } from "lucide-react";
 import { useState } from "react";
@@ -44,15 +45,24 @@ export default function Navbar({ onProfileClick }: NavbarProps) {
       }`}
     >
       {/* LOGO */}
-      <motion.div
+      <motion.a
+        href="/"
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.96 }}
+        aria-label="LOTE 11 — Inicio"
         className={`${
           scrolled ? "glass-panel-strong" : "glass-panel"
-        } ${logoSize} rounded-[22px] flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-300`}
+        } ${logoSize} rounded-[22px] flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-300 relative overflow-hidden`}
       >
-        <span className="font-serif text-sm font-black text-brand-brown tracking-tight">L11</span>
-      </motion.div>
+        <Image
+          src="/logo.png"
+          alt="LOTE 11"
+          fill
+          sizes="80px"
+          preload
+          className="object-contain scale-[1.85] translate-y-[10%]"
+        />
+      </motion.a>
 
       {/* MENÚ */}
       <nav

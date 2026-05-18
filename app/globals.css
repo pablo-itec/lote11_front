@@ -396,10 +396,12 @@ textarea.glass-input { resize: vertical; min-height: 90px; }
 .side-rail-left  { left: 12px; }
 .side-rail-right { right: 12px; }
 
-/* ── REDUCED MOTION ── */
+/* ── REDUCED MOTION ──
+   Sólo desactivamos animaciones decorativas; el ticker es informativo y queda. */
 @media (prefers-reduced-motion: reduce) {
   body::before { animation: none; }
-  .ticker-track { animation: none; }
   .dot-blink { animation: none; }
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .ad-bubble:hover,
+  .news-card:hover,
+  .news-card:hover .news-img { transform: none; }
 }
