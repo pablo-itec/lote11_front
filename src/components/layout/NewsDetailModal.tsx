@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Clock, User, Tag } from "lucide-react";
+import { X, Clock, User, Tag, ArrowRight } from "lucide-react";
 import type { News } from "@/src/types";
 import { fmt, imgSrc } from "@/src/lib/utils";
 
@@ -124,6 +125,18 @@ export default function NewsDetailModal({ news, onClose }: Props) {
                       {tag}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* Link a página completa */}
+              {news.slug && (
+                <div className="mt-7 pt-6 border-t border-white/[0.06] flex justify-end">
+                  <Link
+                    href={`/noticias/${news.slug}`}
+                    className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.15em] uppercase text-brand-brown hover:text-brand-cream transition-colors"
+                  >
+                    Ver artículo completo <ArrowRight size={12} />
+                  </Link>
                 </div>
               )}
             </div>

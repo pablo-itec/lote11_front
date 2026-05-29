@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import LiquidButton from "@/src/components/ui/LiquidButton";
 import type { News } from "@/src/types";
 import { fmt, imgSrc } from "@/src/lib/utils";
 
@@ -84,9 +84,13 @@ function NewsCard({ news, onClick }: { news: News; onClick: () => void }) {
           {fmt(news.createdAt)}
           {news.readTime && ` · ${news.readTime} min`}
         </p>
-        <LiquidButton variant="ghost">
+        <Link
+          href={`/noticias/${news.slug}`}
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-2 px-7 py-[10px] rounded-full text-[9px] font-bold tracking-[0.2em] uppercase transition-colors bg-brand-cream/[0.07] border border-brand-cream/15 text-brand-cream/60 hover:bg-brand-cream/15 hover:text-brand-cream"
+        >
           Leer →
-        </LiquidButton>
+        </Link>
       </div>
     </motion.article>
   );
