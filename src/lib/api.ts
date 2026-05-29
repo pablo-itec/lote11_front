@@ -20,7 +20,13 @@ async function req<T>(method: string, path: string, body?: unknown, isFormData =
   });
 
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('admin_token');
+      window.location.replace('/admin');
+    }
+    throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  }
   return data as T;
 }
 
