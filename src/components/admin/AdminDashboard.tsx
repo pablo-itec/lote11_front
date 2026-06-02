@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { LogOut, Newspaper, Users, Tag, BarChart2 } from "lucide-react";
+import { LogOut, Newspaper, Users, Tag, BarChart2, Megaphone } from "lucide-react";
 import { auth } from "@/src/lib/api";
 import NewsManager          from "./NewsManager";
 import SubscribersManager   from "./SubscribersManager";
 import TopicsManager        from "./TopicsManager";
 import ImportanceManager    from "./ImportanceManager";
+import AdsManager           from "./AdsManager";
 
-type Tab = "news" | "subscribers" | "topics" | "importance";
+type Tab = "news" | "subscribers" | "topics" | "importance" | "ads";
 
 interface Props {
   onLogout: () => void;
@@ -25,7 +26,8 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "news",        label: "Noticias",    icon: <Newspaper size={14} /> },
   { id: "subscribers", label: "Suscriptores", icon: <Users size={14} /> },
   { id: "topics",      label: "Temas",       icon: <Tag size={14} /> },
-  { id: "importance",  label: "Importancia", icon: <BarChart2 size={14} /> },
+  { id: "importance",  label: "Importancia",   icon: <BarChart2 size={14} /> },
+  { id: "ads",         label: "Publicidades",  icon: <Megaphone size={14} /> },
 ];
 
 export default function AdminDashboard({ onLogout }: Props) {
@@ -87,6 +89,7 @@ export default function AdminDashboard({ onLogout }: Props) {
         {tab === "subscribers" && <SubscribersManager onToast={addToast} />}
         {tab === "topics"      && <TopicsManager onToast={addToast} />}
         {tab === "importance"  && <ImportanceManager onToast={addToast} />}
+        {tab === "ads"         && <AdsManager onToast={addToast} />}
       </main>
 
       {/* Toasts */}

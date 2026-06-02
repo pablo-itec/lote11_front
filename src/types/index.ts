@@ -42,6 +42,20 @@ export interface Subscriber {
   unsubscribeToken?: string;
 }
 
+export interface Ad {
+  id: number;
+  side: 'left' | 'right';
+  size: 'large' | 'small';
+  imageUrl: string;
+  linkUrl?: string;
+  displayDuration: number;
+  startsAt?: string;
+  endsAt?: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {

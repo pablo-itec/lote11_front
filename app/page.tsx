@@ -12,8 +12,7 @@ import SubscribeSection from "@/src/components/layout/SubscribeSection";
 import NewsDetailModal  from "@/src/components/layout/NewsDetailModal";
 import ProfileModal     from "@/src/components/layout/ProfileModal";
 import Footer           from "@/src/components/layout/Footer";
-import AdBubbles        from "@/src/components/ads/AdBubbles";
-import AdBanner         from "@/src/components/ads/AdBanner";
+import AdSidebar        from "@/src/components/ads/AdSidebar";
 
 import { newsApi, topicsApi, importanceApi } from "@/src/lib/api";
 import type { News, Topic, ImportanceLevel } from "@/src/types";
@@ -142,7 +141,7 @@ export default function Home() {
         aria-label="Publicidad lateral izquierda"
       >
         <div ref={leftRailRef}>
-          <AdBubbles />
+          <AdSidebar side="left" />
         </div>
       </aside>
       <aside
@@ -151,7 +150,7 @@ export default function Home() {
         aria-label="Publicidad lateral derecha"
       >
         <div ref={rightRailRef}>
-          <AdBanner />
+          <AdSidebar side="right" />
         </div>
       </aside>
 
@@ -187,8 +186,8 @@ export default function Home() {
 
         {/* Fallback de ads en pantallas chicas (< 1400px) */}
         <div className="min-[1400px]:hidden grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-          <AdBubbles />
-          <AdBanner />
+          <AdSidebar side="left" />
+          <AdSidebar side="right" />
         </div>
       </div>
 
