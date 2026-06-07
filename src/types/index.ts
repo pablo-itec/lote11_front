@@ -27,6 +27,7 @@ export interface News {
   status: 'draft' | 'published';
   featured: boolean;
   readTime?: number;
+  clicks?: number;
   createdAt: string;
   topic?: Topic;
   topicId?: number;

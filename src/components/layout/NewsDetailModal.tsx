@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Clock, User, Tag, ArrowRight } from "lucide-react";
 import type { News } from "@/src/types";
 import { fmt, imgSrc } from "@/src/lib/utils";
+import { newsApi } from "@/src/lib/api";
 
 interface Props {
   news: News | null;
@@ -13,6 +15,11 @@ interface Props {
 }
 
 export default function NewsDetailModal({ news, onClose }: Props) {
+  // Issue #2: registra un clic cada vez que se abre el detalle de una noticia.
+  useEffect(() => {
+    if (news?.id) newsApi.registerClick(news.id).catch(() => {});
+  }, [news?.id]);
+
   return (
     <AnimatePresence>
       {news && (

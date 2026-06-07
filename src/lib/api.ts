@@ -58,6 +58,7 @@ export const newsApi = {
   publish: (id: number) => req<News>('PATCH', `/news/${id}/publish`),
   unpublish: (id: number) => req<News>('PATCH', `/news/${id}/unpublish`),
   toggleFeatured: (id: number) => req<News>('PATCH', `/news/${id}/featured`),
+  registerClick: (id: number) => req<{ id: number; clicks: number }>('PATCH', `/news/${id}/click`),
   remove: (id: number) => req<void>('DELETE', `/news/${id}`),
 };
 
