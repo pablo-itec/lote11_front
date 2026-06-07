@@ -1,4 +1,4 @@
-import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics } from '@/src/types';
+import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem } from '@/src/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
 
@@ -65,6 +65,15 @@ export const newsApi = {
 export const metricsApi = {
   getNews: (limit?: number) =>
     req<NewsMetrics>('GET', `/news/admin/metrics${limit ? `?limit=${limit}` : ''}`),
+};
+
+export const carouselApi = {
+  getActive: () => req<CarouselItem[]>('GET', '/carousel'),
+  getAll: () => req<CarouselItem[]>('GET', '/carousel/admin/all'),
+  create: (data: Partial<CarouselItem>) => req<CarouselItem>('POST', '/carousel', data),
+  update: (id: number, data: Partial<CarouselItem>) =>
+    req<CarouselItem>('PATCH', `/carousel/${id}`, data),
+  remove: (id: number) => req<void>('DELETE', `/carousel/${id}`),
 };
 
 export const subscribersApi = {

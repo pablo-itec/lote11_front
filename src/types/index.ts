@@ -57,6 +57,18 @@ export interface Ad {
   updatedAt: string;
 }
 
+export interface CarouselItem {
+  id: number;
+  label: string;
+  content?: string;
+  linkUrl?: string;
+  imageUrl?: string;
+  order: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewsMetrics {
   totalClicks: number;
   ranking: Pick<News, 'id' | 'title' | 'slug' | 'clicks' | 'status'>[];

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { LogOut, Newspaper, Users, Tag, BarChart2, Megaphone, TrendingUp } from "lucide-react";
+import { LogOut, Newspaper, Users, Tag, BarChart2, Megaphone, TrendingUp, GalleryHorizontalEnd } from "lucide-react";
 import { auth } from "@/src/lib/api";
 import NewsManager          from "./NewsManager";
 import SubscribersManager   from "./SubscribersManager";
@@ -10,8 +10,9 @@ import TopicsManager        from "./TopicsManager";
 import ImportanceManager    from "./ImportanceManager";
 import AdsManager           from "./AdsManager";
 import MetricsManager       from "./MetricsManager";
+import CarouselManager      from "./CarouselManager";
 
-type Tab = "news" | "subscribers" | "topics" | "importance" | "ads" | "metrics";
+type Tab = "news" | "subscribers" | "topics" | "importance" | "ads" | "metrics" | "carousel";
 
 interface Props {
   onLogout: () => void;
@@ -30,6 +31,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "importance",  label: "Importancia",   icon: <BarChart2 size={14} /> },
   { id: "ads",         label: "Publicidades",  icon: <Megaphone size={14} /> },
   { id: "metrics",     label: "Métricas",     icon: <TrendingUp size={14} /> },
+  { id: "carousel",    label: "Carrusel",     icon: <GalleryHorizontalEnd size={14} /> },
 ];
 
 export default function AdminDashboard({ onLogout }: Props) {
@@ -93,6 +95,7 @@ export default function AdminDashboard({ onLogout }: Props) {
         {tab === "importance"  && <ImportanceManager onToast={addToast} />}
         {tab === "ads"         && <AdsManager onToast={addToast} />}
         {tab === "metrics"     && <MetricsManager onToast={addToast} />}
+        {tab === "carousel"    && <CarouselManager onToast={addToast} />}
       </main>
 
       {/* Toasts */}
