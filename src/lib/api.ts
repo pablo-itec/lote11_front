@@ -1,4 +1,4 @@
-import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad } from '@/src/types';
+import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics } from '@/src/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
 
@@ -60,6 +60,11 @@ export const newsApi = {
   toggleFeatured: (id: number) => req<News>('PATCH', `/news/${id}/featured`),
   registerClick: (id: number) => req<{ id: number; clicks: number }>('PATCH', `/news/${id}/click`),
   remove: (id: number) => req<void>('DELETE', `/news/${id}`),
+};
+
+export const metricsApi = {
+  getNews: (limit?: number) =>
+    req<NewsMetrics>('GET', `/news/admin/metrics${limit ? `?limit=${limit}` : ''}`),
 };
 
 export const subscribersApi = {

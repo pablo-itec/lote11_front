@@ -57,6 +57,11 @@ export interface Ad {
   updatedAt: string;
 }
 
+export interface NewsMetrics {
+  totalClicks: number;
+  ranking: Pick<News, 'id' | 'title' | 'slug' | 'clicks' | 'status'>[];
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
