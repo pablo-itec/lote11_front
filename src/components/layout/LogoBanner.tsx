@@ -40,8 +40,6 @@ export default function LogoBanner() {
       {/* LOGO PRINCIPAL */}
       <motion.a
         href="/"
-        whileHover={{ scale: 1.06, y: -3 }}
-        whileTap={{ scale: 0.96 }}
         aria-label="LOTE 11 — Inicio"
         className="glass-panel w-32 h-32 rounded-[28px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden"
       >
