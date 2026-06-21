@@ -43,15 +43,15 @@ export default function LogoBanner() {
         whileHover={{ scale: 1.06, y: -3 }}
         whileTap={{ scale: 0.96 }}
         aria-label="LOTE 11 — Inicio"
-        className="w-24 h-24 rounded-[28px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden shadow-[0_10px_32px_rgba(0,0,0,0.45)]"
+        className="w-40 h-40 rounded-[32px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden shadow-[0_10px_32px_rgba(0,0,0,0.45)]"
         style={{ background: "rgba(252,245,238,0.97)" }}
       >
         <Image
           src="/logo.png"
           alt="LOTE 11"
           fill
-          sizes="96px"
-          className="object-contain p-2"
+          sizes="160px"
+          className="object-contain p-3"
         />
       </motion.a>
 
