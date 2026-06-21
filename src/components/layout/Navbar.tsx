@@ -6,6 +6,24 @@ import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Settings } from "lucide-react";
 import { useState } from "react";
 
+function YouTubeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-red-500">
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 text-pink-400">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 interface NavbarProps {
   onProfileClick: () => void;
 }
@@ -49,6 +67,21 @@ export default function Navbar({ onProfileClick }: NavbarProps) {
         scrolled ? "top-3" : "top-5"
       }`}
     >
+      {/* YOUTUBE */}
+      <motion.a
+        href="https://www.youtube.com/@umdmpodcast/videos"
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.94 }}
+        aria-label="Canal de YouTube"
+        className={`${
+          scrolled ? "glass-panel-strong" : "glass-panel"
+        } w-12 h-12 md:w-[52px] md:h-[52px] rounded-[18px] flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-300`}
+      >
+        <YouTubeIcon />
+      </motion.a>
+
       {/* LOGO */}
       <motion.a
         href="/"
@@ -67,6 +100,21 @@ export default function Navbar({ onProfileClick }: NavbarProps) {
           preload
           className="object-contain scale-[1.85] translate-y-[10%]"
         />
+      </motion.a>
+
+      {/* INSTAGRAM */}
+      <motion.a
+        href="https://www.instagram.com/lote11.ar/"
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.94 }}
+        aria-label="Instagram de LOTE 11"
+        className={`${
+          scrolled ? "glass-panel-strong" : "glass-panel"
+        } w-12 h-12 md:w-[52px] md:h-[52px] rounded-[18px] flex items-center justify-center flex-shrink-0 cursor-pointer transition-all duration-300`}
+      >
+        <InstagramIcon />
       </motion.a>
 
       {/* MENÚ */}
