@@ -41,7 +41,8 @@ export default function LogoBanner() {
       <motion.a
         href="/"
         aria-label="LOTE 11 — Inicio"
-        className="glass-panel w-32 h-32 rounded-[28px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden"
+        className="w-32 h-32 rounded-[28px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden"
+        style={{ background: "rgba(252,245,238,0.18)", backdropFilter: "blur(20px)", border: "1px solid rgba(252,245,238,0.15)" }}
       >
         <Image
           src="/logo.png"
@@ -49,7 +50,6 @@ export default function LogoBanner() {
           fill
           sizes="128px"
           className="object-contain"
-          style={{ mixBlendMode: "multiply" }}
         />
       </motion.a>
 
