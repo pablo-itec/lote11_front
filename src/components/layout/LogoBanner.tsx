@@ -50,7 +50,7 @@ export default function LogoBanner() {
           alt="LOTE 11"
           fill
           sizes="80px"
-          className="object-contain scale-[1.9]"
+          className="object-contain scale-[1.35]"
         />
       </motion.a>
 
