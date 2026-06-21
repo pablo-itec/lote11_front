@@ -43,14 +43,14 @@ export default function LogoBanner() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.96 }}
         aria-label="LOTE 11 — Inicio"
-        className="glass-panel w-28 h-28 rounded-[26px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden"
+        className="glass-panel w-24 h-24 rounded-[24px] flex items-center justify-center flex-shrink-0 cursor-pointer relative overflow-hidden"
       >
         <Image
           src="/logo.png"
           alt="LOTE 11"
           fill
           sizes="80px"
-          className="object-cover scale-[1.1]"
+          className="object-cover scale-[1.4]"
         />
       </motion.a>
 
