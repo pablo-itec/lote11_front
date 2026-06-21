@@ -393,8 +393,8 @@ textarea.glass-input { resize: vertical; min-height: 90px; }
   scrollbar-width: none;
 }
 .side-rail::-webkit-scrollbar { display: none; }
-.side-rail-left  { left: 12px; }
-.side-rail-right { right: 12px; }
+.side-rail-left  { left: 16px; }
+.side-rail-right { right: 16px; }
 
 /* ── REDUCED MOTION ──
    Sólo desactivamos animaciones decorativas; el ticker es informativo y queda. */
