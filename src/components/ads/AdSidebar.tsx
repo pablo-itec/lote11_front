@@ -27,7 +27,18 @@ export default function AdSidebar({ side }: Props) {
       .catch(() => {});
   }, [side]);
 
-  if (!ads.length) return null;
+  if (!ads.length) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="glass-panel rounded-[28px] overflow-hidden relative aspect-[3/6] w-full flex items-center justify-center">
+          <span className="text-[9px] font-bold tracking-[0.2em] text-brand-cream/20 uppercase">Publicidad</span>
+        </div>
+        <div className="glass-panel rounded-[28px] overflow-hidden relative aspect-[14/9] w-full flex items-center justify-center">
+          <span className="text-[9px] font-bold tracking-[0.2em] text-brand-cream/20 uppercase">Publicidad</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3">
