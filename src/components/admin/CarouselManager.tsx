@@ -6,13 +6,19 @@
 import { useState, useEffect } from "react";
 import { Plus, X } from "lucide-react";
 import { carouselApi } from "@/src/lib/api";
-import type { CarouselItem } from "@/src/types";
+import type { CarouselItem, CarouselPip } from "@/src/types";
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
 }
 
-const EMPTY = { label: "", content: "", linkUrl: "", imageUrl: "", order: 0, active: true };
+const EMPTY = { label: "", content: "", linkUrl: "", imageUrl: "", pip: "red", order: 0, active: true };
+
+const PIP_OPTIONS = [
+  { value: "red", label: "Rojo" },
+  { value: "brown", label: "Marrón" },
+  { value: "dim", label: "Tenue" },
+];
 
 export default function CarouselManager({ onToast }: Props) {
   const [list, setList]           = useState<CarouselItem[]>([]);
@@ -40,6 +46,7 @@ export default function CarouselManager({ onToast }: Props) {
       content: c.content ?? "",
       linkUrl: c.linkUrl ?? "",
       imageUrl: c.imageUrl ?? "",
+      pip: c.pip ?? "red",
       order: c.order,
       active: c.active,
     });
@@ -54,6 +61,7 @@ export default function CarouselManager({ onToast }: Props) {
       content: form.content || undefined,
       linkUrl: form.linkUrl || undefined,
       imageUrl: form.imageUrl || undefined,
+      pip: form.pip as CarouselPip,
       order: +form.order,
       active: form.active,
     };
@@ -112,6 +120,14 @@ export default function CarouselManager({ onToast }: Props) {
             <div>
               <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Orden</label>
               <input type="number" min={0} value={form.order} onChange={(e) => setForm((p) => ({ ...p, order: +e.target.value }))} className="glass-input" />
+            </div>
+            <div>
+              <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Color</label>
+              <select value={form.pip} onChange={(e) => setForm((p) => ({ ...p, pip: e.target.value }))} className="glass-input">
+                {PIP_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </div>
             <div className="flex items-end gap-2 pb-1">
               <input id="carousel-active" type="checkbox" checked={form.active} onChange={(e) => setForm((p) => ({ ...p, active: e.target.checked }))} />

@@ -63,11 +63,14 @@ export interface CarouselItem {
   content?: string;
   linkUrl?: string;
   imageUrl?: string;
+  pip: CarouselPip;
   order: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+export type CarouselPip = "red" | "brown" | "dim";
 
 export interface NewsMetrics {
   totalClicks: number;

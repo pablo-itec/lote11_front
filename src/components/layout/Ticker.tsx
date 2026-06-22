@@ -2,21 +2,11 @@
 // src/components/layout/Ticker.tsx
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { carouselApi } from "@/src/lib/api";
+import type { CarouselItem, CarouselPip } from "@/src/types";
 
-const ITEMS = [
-  { label: "NUEVO EP. 12 — INVERSIONES 2026", pip: "red" },
-  { label: "PALERMO SOHO +18% YTD",           pip: "brown" },
-  { label: "ENTREVISTA: ARQ. LUNA VIDAL",      pip: "dim" },
-  { label: "MASTERCLASS ONLINE — 24 MAYO",    pip: "red" },
-  { label: "BUENOS AIRES · TOP DESTINO 2026", pip: "brown" },
-  { label: "NEWSLETTER MAYO — SUSCRIBITE",    pip: "dim" },
-  { label: "DÓLAR INMOBILIARIO: ANÁLISIS MES", pip: "red" },
-  { label: "REPORTE Q2 — DESCARGA GRATUITA",  pip: "brown" },
-  { label: "PODCAST EP. 13 — PRÓXIMAMENTE",   pip: "dim" },
-];
-
-const PIP: Record<string, string> = {
+const PIP: Record<CarouselPip, string> = {
   red:   "bg-brand-red",
   brown: "bg-brand-brown",
   dim:   "bg-brand-cream/20",
@@ -25,8 +15,19 @@ const PIP: Record<string, string> = {
 const DURATION = 34;
 
 export default function Ticker() {
-  const doubled = [...ITEMS, ...ITEMS];
+  const [items, setItems] = useState<CarouselItem[]>([]);
   const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    carouselApi.getActive()
+      .then(setItems)
+      .catch(() => setItems([]));
+  }, []);
+
+  // Sin fallback: si no hay items activos, no se muestra la marquesina.
+  if (items.length === 0) return null;
+
+  const doubled = [...items, ...items];
 
   return (
     <div className="relative h-[42px] rounded-full flex items-center overflow-hidden glass-panel">
@@ -52,15 +53,27 @@ export default function Ticker() {
           transition={{ duration: DURATION, ease: "linear", repeat: Infinity }}
           style={{ willChange: "transform" }}
         >
-          {doubled.map((item, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-2 px-5 text-[9px] font-bold tracking-[0.16em] text-brand-cream/55 uppercase border-r border-brand-cream/[0.07] h-[42px] cursor-pointer hover:text-brand-cream transition-colors flex-shrink-0"
-            >
-              <span className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${PIP[item.pip]}`} />
-              {item.label}
-            </span>
-          ))}
+          {doubled.map((item, i) => {
+            const content = (
+              <>
+                <span className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${PIP[item.pip] ?? PIP.red}`} />
+                {item.label}
+                {item.content ? <span className="text-brand-cream/80 normal-case">{item.content}</span> : null}
+              </>
+            );
+            const cls =
+              "inline-flex items-center gap-2 px-5 text-[9px] font-bold tracking-[0.16em] text-brand-cream/55 uppercase border-r border-brand-cream/[0.07] h-[42px] cursor-pointer hover:text-brand-cream transition-colors flex-shrink-0";
+
+            return item.linkUrl ? (
+              <a key={`${item.id}-${i}`} href={item.linkUrl} target="_blank" rel="noopener noreferrer" className={cls}>
+                {content}
+              </a>
+            ) : (
+              <span key={`${item.id}-${i}`} className={cls}>
+                {content}
+              </span>
+            );
+          })}
         </motion.div>
       </div>
 
