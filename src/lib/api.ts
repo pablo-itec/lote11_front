@@ -1,6 +1,8 @@
 import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem } from '@/src/types';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
+const BASE = typeof window === 'undefined'
+  ? (process.env.API_URL ?? 'http://backend:3000/api')
+  : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api');
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -22,7 +24,7 @@ async function req<T>(method: string, path: string, body?: unknown, isFormData =
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('admin_token');
+      auth.clearToken();
       window.location.replace('/admin');
     }
     throw new Error((data as { message?: string }).message || `Error ${res.status}`);
