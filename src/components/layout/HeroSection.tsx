@@ -22,22 +22,25 @@ export default function HeroSection({ news, onReadMore }: Props) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="glass-panel rounded-[44px] p-10 flex flex-col justify-center min-h-[300px] lg:min-h-[340px]"
+          className="glass-panel rounded-[44px] p-10 flex flex-col justify-center min-h-[300px] lg:min-h-[340px] relative overflow-hidden"
         >
-          <p className="text-[8px] font-bold tracking-[0.25em] text-brand-red uppercase mb-4 flex items-center gap-2">
-            <span className="w-4 h-px bg-brand-red inline-block" />
+          {/* edición / fecha en serif */}
+          <span className="absolute top-6 right-8 font-serif italic text-[11px] text-brand-cream/40">
+            № {new Date(news.createdAt).getFullYear()}
+          </span>
+          <p className="kicker mb-5">
             {news.featured ? "Artículo Destacado" : news.topic?.name ?? "Última hora"}
           </p>
-          <h1 className="font-serif text-[32px] xl:text-[42px] font-black text-brand-brown leading-[0.92] tracking-tight mb-4">
+          <h1 className="font-serif text-[34px] xl:text-[46px] font-black text-brand-brown leading-[0.92] tracking-tight mb-4">
             {news.title}
           </h1>
           {news.subtitle && (
-            <p className="text-[11px] text-brand-cream/48 leading-relaxed mb-3 max-w-xs italic">
+            <p className="font-serif italic text-[13px] text-brand-cream/65 leading-relaxed mb-4 max-w-sm">
               {news.subtitle}
             </p>
           )}
-          <p className="text-[9px] text-brand-cream/30 mb-7 font-medium">
-            {news.author && <span className="text-brand-cream/45 font-bold">{news.author} · </span>}
+          <p className="text-[9px] text-brand-cream/55 mb-7 font-medium tracking-wide">
+            {news.author && <span className="text-brand-cream/75 font-bold">{news.author} · </span>}
             {fmt(news.createdAt)}
             {news.readTime && ` · ${news.readTime} min`}
           </p>
@@ -60,12 +63,15 @@ export default function HeroSection({ news, onReadMore }: Props) {
             src={news.imageUrl ? imgSrc(news.imageUrl) : HERO_IMG}
             alt={news.title}
             fill
-            className="object-cover hover:scale-105 transition-transform duration-[1200ms]"
+            className="object-cover duotone hover:scale-[1.04] transition-transform duration-[1400ms]"
             priority
+            sizes="(max-width: 1024px) 100vw, 60vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          <div className="absolute bottom-5 left-5">
-            <span className="text-[8px] font-bold tracking-[0.18em] text-brand-cream/50 uppercase bg-black/40 backdrop-blur-sm border border-white/[0.08] px-3 py-[5px] rounded-full">
+          {/* Vignette + gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+          <div className="absolute inset-0 [box-shadow:inset_0_0_120px_rgba(0,0,0,0.55)] pointer-events-none rounded-[44px]" />
+          <div className="absolute bottom-5 left-5 flex items-center gap-2">
+            <span className="text-[8px] font-bold tracking-[0.18em] text-brand-cream/85 uppercase bg-black/50 backdrop-blur-md border border-white/[0.12] px-3 py-[5px] rounded-full">
               {news.topic?.name ?? "Artículo"} · {new Date(news.createdAt).getFullYear()}
             </span>
           </div>
@@ -81,16 +87,16 @@ export default function HeroSection({ news, onReadMore }: Props) {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="glass-panel rounded-[44px] p-10 flex flex-col justify-center min-h-[300px] lg:min-h-[340px]"
+        className="glass-panel rounded-[44px] p-10 flex flex-col justify-center min-h-[300px] lg:min-h-[340px] relative overflow-hidden"
       >
-        <p className="text-[8px] font-bold tracking-[0.25em] text-brand-red uppercase mb-4 flex items-center gap-2">
-          <span className="w-4 h-px bg-brand-red inline-block" />
-          Edición Mayo 2026
-        </p>
+        <span className="absolute top-6 right-8 font-serif italic text-[11px] text-brand-cream/40">
+          № MMXXVI
+        </span>
+        <p className="kicker mb-5">Edición Mayo 2026</p>
         <h1 className="font-serif text-[42px] xl:text-[52px] font-black text-brand-brown leading-[0.88] tracking-tight mb-5">
           EL FUTURO<br />DEL MERCADO
         </h1>
-        <p className="text-[11px] text-brand-cream/48 leading-relaxed mb-7 max-w-xs">
+        <p className="font-serif italic text-[13px] text-brand-cream/65 leading-relaxed mb-7 max-w-xs">
           Arquitectura sustentable y el impacto de la IA en el Real Estate. Una mirada exclusiva hacia el segundo semestre.
         </p>
         <div className="flex gap-3 flex-wrap">
@@ -109,12 +115,14 @@ export default function HeroSection({ news, onReadMore }: Props) {
           src={HERO_IMG}
           alt="Arquitectura de lujo"
           fill
-          className="object-cover hover:scale-105 transition-transform duration-[1200ms]"
+          className="object-cover duotone hover:scale-[1.04] transition-transform duration-[1400ms]"
           priority
+          sizes="(max-width: 1024px) 100vw, 60vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+        <div className="absolute inset-0 [box-shadow:inset_0_0_120px_rgba(0,0,0,0.55)] pointer-events-none rounded-[44px]" />
         <div className="absolute bottom-5 left-5">
-          <span className="text-[8px] font-bold tracking-[0.18em] text-brand-cream/50 uppercase bg-black/40 backdrop-blur-sm border border-white/[0.08] px-3 py-[5px] rounded-full">
+          <span className="text-[8px] font-bold tracking-[0.18em] text-brand-cream/85 uppercase bg-black/50 backdrop-blur-md border border-white/[0.12] px-3 py-[5px] rounded-full">
             Arquitectura de Lujo · 2026
           </span>
         </div>

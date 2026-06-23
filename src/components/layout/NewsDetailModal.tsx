@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Clock, User, Tag } from "lucide-react";
+import { X, Clock, User, Tag, ArrowRight } from "lucide-react";
 import type { News } from "@/src/types";
 import { fmt, imgSrc } from "@/src/lib/utils";
+import { newsApi } from "@/src/lib/api";
 
 interface Props {
   news: News | null;
@@ -12,6 +15,11 @@ interface Props {
 }
 
 export default function NewsDetailModal({ news, onClose }: Props) {
+  // Issue #2: registra un clic cada vez que se abre el detalle de una noticia.
+  useEffect(() => {
+    if (news?.id) newsApi.registerClick(news.id).catch(() => {});
+  }, [news?.id]);
+
   return (
     <AnimatePresence>
       {news && (
@@ -108,9 +116,9 @@ export default function NewsDetailModal({ news, onClose }: Props) {
               <div className="h-px bg-white/[0.06] mb-7" />
 
               {/* Body */}
-              <p className="text-[13px] text-brand-cream/65 leading-[1.85] whitespace-pre-wrap">
+              <div className="text-[14px] text-brand-cream/80 leading-[1.85] whitespace-pre-wrap drop-cap">
                 {news.body}
-              </p>
+              </div>
 
               {/* Tags */}
               {news.tags && news.tags.length > 0 && (
@@ -124,6 +132,18 @@ export default function NewsDetailModal({ news, onClose }: Props) {
                       {tag}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* Link a página completa */}
+              {news.slug && (
+                <div className="mt-7 pt-6 border-t border-white/[0.06] flex justify-end">
+                  <Link
+                    href={`/noticias/${news.slug}`}
+                    className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.15em] uppercase text-brand-brown hover:text-brand-cream transition-colors"
+                  >
+                    Ver artículo completo <ArrowRight size={12} />
+                  </Link>
                 </div>
               )}
             </div>

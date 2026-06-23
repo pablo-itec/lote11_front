@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 import Navbar           from "@/src/components/layout/Navbar";
 import Ticker           from "@/src/components/layout/Ticker";
@@ -12,8 +12,7 @@ import SubscribeSection from "@/src/components/layout/SubscribeSection";
 import NewsDetailModal  from "@/src/components/layout/NewsDetailModal";
 import ProfileModal     from "@/src/components/layout/ProfileModal";
 import Footer           from "@/src/components/layout/Footer";
-import AdBubbles        from "@/src/components/ads/AdBubbles";
-import AdBanner         from "@/src/components/ads/AdBanner";
+import AdSidebar        from "@/src/components/ads/AdSidebar";
 
 import { newsApi, topicsApi, importanceApi } from "@/src/lib/api";
 import type { News, Topic, ImportanceLevel } from "@/src/types";
@@ -83,6 +82,42 @@ export default function Home() {
   const handleTopic  = (t: string) => { setTopicId(t); setPage(1); };
   const handleImp    = (i: string) => { setImportanceId(i); setPage(1); };
 
+  // Side rails: fijos en pantalla pero chocan contra el footer (no lo tapan)
+  const footerRef = useRef<HTMLDivElement>(null);
+  const leftRailRef = useRef<HTMLDivElement>(null);
+  const rightRailRef = useRef<HTMLDivElement>(null);
+  const [leftTop, setLeftTop] = useState(110);
+  const [rightTop, setRightTop] = useState(110);
+
+  useEffect(() => {
+    const BASE_TOP = 110;
+    const GAP = 16;
+    let raf = 0;
+
+    const compute = () => {
+      const footer = footerRef.current?.getBoundingClientRect();
+      if (!footer) return;
+      const leftH = leftRailRef.current?.offsetHeight ?? 0;
+      const rightH = rightRailRef.current?.offsetHeight ?? 0;
+      setLeftTop(Math.min(BASE_TOP, footer.top - leftH - GAP));
+      setRightTop(Math.min(BASE_TOP, footer.top - rightH - GAP));
+    };
+
+    const onScroll = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(compute);
+    };
+
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <>
       {/* ── NAV ── */}
@@ -92,70 +127,74 @@ export default function Home() {
       <div className="h-[100px]" />
 
       {/* ── TICKER ── */}
-      <div className="px-5 mb-3">
+      <div className="max-w-[1080px] mx-auto px-5 mb-3">
         <Ticker />
       </div>
 
       {/*
-        ── MAIN LAYOUT ──
-        Mobile:  columna única
-        Desktop: 3 columnas [ads | contenido | banner]
+        ── SIDE RAILS (fixed, sticky-to-viewport) ──
+        Visibles sólo en pantallas >= 1400px para que no pisen el contenido.
       */}
-      <div className="
-        max-w-[1400px] mx-auto
-        px-0
-        grid gap-3
-        grid-cols-1
-        xl:grid-cols-[200px_1fr_185px]
-        xl:px-0
-      ">
-
-        {/* SIDEBAR IZQ */}
-        <div className="hidden xl:block pl-3">
-          <div className="sticky top-[100px]">
-            <AdBubbles />
-          </div>
+      <aside
+        className="side-rail side-rail-left hidden min-[1400px]:block"
+        style={{ top: `${leftTop}px` }}
+        aria-label="Publicidad lateral izquierda"
+      >
+        <div ref={leftRailRef}>
+          <AdSidebar side="left" />
         </div>
-
-        {/* CONTENIDO CENTRAL */}
-        <div className="flex flex-col gap-3 px-5 xl:px-0">
-          <HeroSection news={heroNews} onReadMore={openDetail} />
-
-          <SearchFilters
-            topics={topics}
-            importanceLevels={importanceLevels}
-            onSearch={handleSearch}
-            onTopicChange={handleTopic}
-            onImportanceChange={handleImp}
-          />
-
-          <NewsGrid
-            news={loading ? undefined : newsList}
-            loading={loading}
-            onNewsClick={openDetail}
-          />
-
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPrev={() => setPage((p) => p - 1)}
-            onNext={() => setPage((p) => p + 1)}
-          />
-
-          <SubscribeSection />
+      </aside>
+      <aside
+        className="side-rail side-rail-right hidden min-[1400px]:block"
+        style={{ top: `${rightTop}px` }}
+        aria-label="Publicidad lateral derecha"
+      >
+        <div ref={rightRailRef}>
+          <AdSidebar side="right" />
         </div>
+      </aside>
 
-        {/* SIDEBAR DER */}
-        <div className="hidden xl:block pr-3">
-          <div className="sticky top-[100px]">
-            <AdBanner />
-          </div>
+      {/*
+        ── CONTENIDO CENTRAL ──
+        En pantallas chicas mostramos los ads inline al final.
+      */}
+      <div className="max-w-[1080px] mx-auto px-5 flex flex-col gap-3">
+        <HeroSection news={heroNews} onReadMore={openDetail} />
+
+        <SearchFilters
+          topics={topics}
+          importanceLevels={importanceLevels}
+          onSearch={handleSearch}
+          onTopicChange={handleTopic}
+          onImportanceChange={handleImp}
+        />
+
+        <NewsGrid
+          news={loading ? undefined : newsList}
+          loading={loading}
+          onNewsClick={openDetail}
+        />
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPrev={() => setPage((p) => p - 1)}
+          onNext={() => setPage((p) => p + 1)}
+        />
+
+        <SubscribeSection />
+
+        {/* Fallback de ads en pantallas chicas (< 1400px) */}
+        <div className="min-[1400px]:hidden grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <AdSidebar side="left" />
+          <AdSidebar side="right" />
         </div>
-
       </div>
 
       {/* ── FOOTER ── */}
-      <Footer />
+      <div ref={footerRef}>
+        <Footer />
+      </div>
 
       {/* ── MODALS ── */}
       <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />

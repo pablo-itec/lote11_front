@@ -1,4 +1,4 @@
-import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse } from '@/src/types';
+import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem } from '@/src/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
 
@@ -20,7 +20,13 @@ async function req<T>(method: string, path: string, body?: unknown, isFormData =
   });
 
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('admin_token');
+      window.location.replace('/admin');
+    }
+    throw new Error((data as { message?: string }).message || `Error ${res.status}`);
+  }
   return data as T;
 }
 
@@ -52,7 +58,22 @@ export const newsApi = {
   publish: (id: number) => req<News>('PATCH', `/news/${id}/publish`),
   unpublish: (id: number) => req<News>('PATCH', `/news/${id}/unpublish`),
   toggleFeatured: (id: number) => req<News>('PATCH', `/news/${id}/featured`),
+  registerClick: (id: number) => req<{ id: number; clicks: number }>('PATCH', `/news/${id}/click`),
   remove: (id: number) => req<void>('DELETE', `/news/${id}`),
+};
+
+export const metricsApi = {
+  getNews: (limit?: number) =>
+    req<NewsMetrics>('GET', `/news/admin/metrics${limit ? `?limit=${limit}` : ''}`),
+};
+
+export const carouselApi = {
+  getActive: () => req<CarouselItem[]>('GET', '/carousel'),
+  getAll: () => req<CarouselItem[]>('GET', '/carousel/admin/all'),
+  create: (data: Partial<CarouselItem>) => req<CarouselItem>('POST', '/carousel', data),
+  update: (id: number, data: Partial<CarouselItem>) =>
+    req<CarouselItem>('PATCH', `/carousel/${id}`, data),
+  remove: (id: number) => req<void>('DELETE', `/carousel/${id}`),
 };
 
 export const subscribersApi = {
@@ -69,6 +90,16 @@ export const topicsApi = {
   create: (data: Partial<Topic>) => req<Topic>('POST', '/topics', data),
   update: (id: number, data: Partial<Topic>) => req<Topic>('PATCH', `/topics/${id}`, data),
   remove: (id: number) => req<void>('DELETE', `/topics/${id}`),
+};
+
+export const adsApi = {
+  getBySide: (side: 'left' | 'right') => req<Ad[]>('GET', `/ads/${side}`),
+  getAdminAll: (side?: string) =>
+    req<Ad[]>('GET', `/ads/admin/all${side ? `?side=${side}` : ''}`),
+  create: (formData: FormData) => req<Ad>('POST', '/ads', formData, true),
+  update: (id: number, formData: FormData) => req<Ad>('PATCH', `/ads/${id}`, formData, true),
+  reorder: (id: number, newOrder: number) => req<Ad[]>('PATCH', `/ads/${id}/reorder`, { newOrder }),
+  remove: (id: number) => req<void>('DELETE', `/ads/${id}`),
 };
 
 export const importanceApi = {

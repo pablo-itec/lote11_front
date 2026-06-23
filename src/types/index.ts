@@ -27,6 +27,7 @@ export interface News {
   status: 'draft' | 'published';
   featured: boolean;
   readTime?: number;
+  clicks?: number;
   createdAt: string;
   topic?: Topic;
   topicId?: number;
@@ -40,6 +41,40 @@ export interface Subscriber {
   active: boolean;
   subscribedAt: string;
   unsubscribeToken?: string;
+}
+
+export interface Ad {
+  id: number;
+  side: 'left' | 'right';
+  size: 'large' | 'small';
+  imageUrl: string;
+  linkUrl?: string;
+  displayDuration: number;
+  startsAt?: string;
+  endsAt?: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CarouselItem {
+  id: number;
+  label: string;
+  content?: string;
+  linkUrl?: string;
+  imageUrl?: string;
+  pip: CarouselPip;
+  order: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CarouselPip = "red" | "brown" | "dim";
+
+export interface NewsMetrics {
+  totalClicks: number;
+  ranking: Pick<News, 'id' | 'title' | 'slug' | 'clicks' | 'status'>[];
 }
 
 export interface PaginatedResponse<T> {
