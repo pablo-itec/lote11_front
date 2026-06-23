@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import type { Ad } from "@/src/types";
+import { API_BASE } from "@/src/lib/api";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
+const BASE = API_BASE;
 
 // large → portrait 3:5 · small → landscape 14:9
 const SIZE_ASPECT: Record<string, string> = {

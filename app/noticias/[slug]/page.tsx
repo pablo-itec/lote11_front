@@ -4,14 +4,11 @@ import { notFound } from "next/navigation";
 import { Clock, User, Tag, ArrowLeft } from "lucide-react";
 import type { News } from "@/src/types";
 import { fmt, imgSrc } from "@/src/lib/utils";
+import { API_BASE } from "@/src/lib/api";
 
 async function getNews(slug: string): Promise<News | null> {
-  const base =
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:3000/api";
   try {
-    const res = await fetch(`${base}/news/slug/${slug}`, {
+    const res = await fetch(`${API_BASE}/news/slug/${slug}`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;

@@ -1,8 +1,16 @@
 import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem } from '@/src/types';
 
-const BASE = typeof window === 'undefined'
-  ? (process.env.API_URL ?? 'http://backend:3000/api')
+// Única fuente de verdad para la URL del backend.
+// Server (SSR/server components): prioriza API_URL; cae a NEXT_PUBLIC_API_URL.
+// Browser: usa NEXT_PUBLIC_API_URL (inlineada en build por Next).
+export const API_BASE = typeof window === 'undefined'
+  ? (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api')
   : (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api');
+
+// Mismo host sin el sufijo /api (para construir URLs de assets/imágenes).
+export const API_ORIGIN = API_BASE.replace(/\/api$/, '');
+
+const BASE = API_BASE;
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;

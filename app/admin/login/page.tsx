@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/src/lib/api";
+import { auth, API_BASE } from "@/src/lib/api";
 import LoginPanel from "@/src/components/admin/LoginPanel";
 
 export default function LoginPage() {
@@ -11,7 +11,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (!auth.hasToken()) return;
     // Verificar que el token siga siendo válido en el servidor
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api'}/auth/me`, {
+    fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('admin_token')}` },
     })
       .then(r => { if (r.ok) router.replace("/admin"); else auth.clearToken(); })
