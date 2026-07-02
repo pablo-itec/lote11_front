@@ -21,6 +21,10 @@ export const metadata = {
   description: "Directorio de profesionales y oficios agrupados por rubro.",
 };
 
+// Render on-demand (no prerender en build): evita que el fetch al backend
+// bloquee la generación estática en Vercel.
+export const dynamic = "force-dynamic";
+
 export default async function TarjeteroPage() {
   const groups = await getGroups();
 
