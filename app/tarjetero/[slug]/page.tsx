@@ -6,6 +6,7 @@ import type { TarjeteroGroup } from "@/src/types";
 import { imgSrc } from "@/src/lib/utils";
 import { API_BASE } from "@/src/lib/api";
 import TarjeteroPersonCard from "@/src/components/layout/TarjeteroPersonCard";
+import SiteHeader from "@/src/components/layout/SiteHeader";
 
 async function getGroup(slug: string): Promise<TarjeteroGroup | null> {
   try {
@@ -30,6 +31,8 @@ export default async function TarjeteroGroupPage({
 
   return (
     <div className="min-h-screen">
+      <SiteHeader />
+
       <div className="max-w-[1080px] mx-auto px-6 pt-8">
         <Link
           href="/tarjetero"
