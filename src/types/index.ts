@@ -72,6 +72,32 @@ export interface CarouselItem {
 
 export type CarouselPip = "red" | "brown" | "dim";
 
+export interface TarjeteroPerson {
+  id: number;
+  groupId: number;
+  name: string;
+  role?: string;
+  imageUrl?: string;
+  email?: string;
+  order: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TarjeteroGroup {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl?: string;
+  description?: string;
+  order: number;
+  active: boolean;
+  people?: TarjeteroPerson[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewsMetrics {
   totalClicks: number;
   ranking: Pick<News, 'id' | 'title' | 'slug' | 'clicks' | 'status'>[];
