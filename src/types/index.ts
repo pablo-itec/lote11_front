@@ -93,9 +93,26 @@ export interface TarjeteroGroup {
   description?: string;
   order: number;
   active: boolean;
+  sectionId?: number | null;
   people?: TarjeteroPerson[];
   createdAt: string;
   updatedAt: string;
+}
+
+// Sección/etiqueta que agrupa rubros en el menú del tarjetero.
+// El bucket "sin sección" que devuelve el back viene con id/name/slug null.
+export interface TarjeteroSection {
+  id: number | null;
+  name: string | null;
+  slug: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
+  priority: number | null;
+  randomOrder?: number | null;
+  active: boolean;
+  groups?: TarjeteroGroup[];
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface NewsMetrics {

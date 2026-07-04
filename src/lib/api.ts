@@ -1,4 +1,4 @@
-import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson } from '@/src/types';
+import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection } from '@/src/types';
 
 // Única fuente de verdad para la URL del backend.
 // Server (SSR/server components): prioriza API_URL; cae a NEXT_PUBLIC_API_URL.
@@ -114,9 +114,15 @@ export const adsApi = {
 
 export const tarjeteroApi = {
   getActive: () => req<TarjeteroGroup[]>('GET', '/tarjetero'),
+  getSections: () => req<TarjeteroSection[]>('GET', '/tarjetero/sections'),
   getBySlug: (slug: string) => req<TarjeteroGroup>('GET', `/tarjetero/slug/${slug}`),
   getById: (id: number) => req<TarjeteroGroup>('GET', `/tarjetero/${id}`),
   getAll: () => req<TarjeteroGroup[]>('GET', '/tarjetero/admin/all'),
+  getAllSections: () => req<TarjeteroSection[]>('GET', '/tarjetero/sections/admin/all'),
+  createSection: (formData: FormData) => req<TarjeteroSection>('POST', '/tarjetero/sections', formData, true),
+  updateSection: (id: number, formData: FormData) =>
+    req<TarjeteroSection>('PATCH', `/tarjetero/sections/${id}`, formData, true),
+  removeSection: (id: number) => req<void>('DELETE', `/tarjetero/sections/${id}`),
   createGroup: (formData: FormData) => req<TarjeteroGroup>('POST', '/tarjetero', formData, true),
   updateGroup: (id: number, formData: FormData) =>
     req<TarjeteroGroup>('PATCH', `/tarjetero/${id}`, formData, true),

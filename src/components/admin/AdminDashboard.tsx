@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { LogOut, Newspaper, Users, Tag, BarChart2, Megaphone, TrendingUp, GalleryHorizontalEnd, Contact } from "lucide-react";
 import { auth } from "@/src/lib/api";
@@ -25,15 +25,38 @@ interface Toast {
   id: number;
 }
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: "news",        label: "Noticias",    icon: <Newspaper size={14} /> },
-  { id: "subscribers", label: "Suscriptores", icon: <Users size={14} /> },
-  { id: "topics",      label: "Temas",       icon: <Tag size={14} /> },
-  { id: "importance",  label: "Importancia",   icon: <BarChart2 size={14} /> },
-  { id: "ads",         label: "Publicidades",  icon: <Megaphone size={14} /> },
-  { id: "metrics",     label: "Métricas",     icon: <TrendingUp size={14} /> },
-  { id: "carousel",    label: "Carrusel",     icon: <GalleryHorizontalEnd size={14} /> },
-  { id: "tarjetero",   label: "Tarjetero",    icon: <Contact size={14} /> },
+interface TabDef { id: Tab; label: string; icon: React.ReactNode }
+
+// Navegación agrupada por área.
+const TAB_GROUPS: { label: string; tabs: TabDef[] }[] = [
+  {
+    label: "Contenido",
+    tabs: [
+      { id: "news",       label: "Noticias",   icon: <Newspaper size={14} /> },
+      { id: "topics",     label: "Temas",      icon: <Tag size={14} /> },
+      { id: "importance", label: "Importancia", icon: <BarChart2 size={14} /> },
+    ],
+  },
+  {
+    label: "Audiencia",
+    tabs: [
+      { id: "subscribers", label: "Suscriptores", icon: <Users size={14} /> },
+      { id: "metrics",     label: "Métricas",     icon: <TrendingUp size={14} /> },
+    ],
+  },
+  {
+    label: "Publicidad",
+    tabs: [
+      { id: "ads",      label: "Publicidades", icon: <Megaphone size={14} /> },
+      { id: "carousel", label: "Carrusel",     icon: <GalleryHorizontalEnd size={14} /> },
+    ],
+  },
+  {
+    label: "Tarjetero",
+    tabs: [
+      { id: "tarjetero", label: "Tarjetero", icon: <Contact size={14} /> },
+    ],
+  },
 ];
 
 export default function AdminDashboard({ onLogout }: Props) {
@@ -69,22 +92,32 @@ export default function AdminDashboard({ onLogout }: Props) {
         </div>
       </header>
 
-      {/* Tab nav */}
+      {/* Tab nav — agrupada por área */}
       <nav className="mx-5 mt-3">
-        <div className="glass-panel rounded-[20px] p-1.5 flex gap-1 flex-wrap">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-5 py-2 rounded-[14px] text-[9px] font-bold tracking-[0.15em] uppercase transition-all ${
-                tab === t.id
-                  ? "bg-brand-brown text-brand-cream"
-                  : "text-brand-cream/35 hover:text-brand-cream/60"
-              }`}
-            >
-              {t.icon}
-              {t.label}
-            </button>
+        <div className="glass-panel rounded-[20px] p-1.5 flex gap-1.5 flex-wrap items-stretch">
+          {TAB_GROUPS.map((group, gi) => (
+            <div key={group.label} className="flex items-center">
+              {gi > 0 && <span className="mx-1 self-stretch w-px bg-brand-cream/10" aria-hidden />}
+              <div className="flex flex-col gap-1 px-1">
+                <span className="text-[7px] font-bold tracking-[0.2em] text-brand-cream/25 uppercase px-2">{group.label}</span>
+                <div className="flex gap-1 flex-wrap">
+                  {group.tabs.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setTab(t.id)}
+                      className={`flex items-center gap-2 px-5 py-2 rounded-[14px] text-[9px] font-bold tracking-[0.15em] uppercase transition-all ${
+                        tab === t.id
+                          ? "bg-brand-brown text-brand-cream"
+                          : "text-brand-cream/35 hover:text-brand-cream/60"
+                      }`}
+                    >
+                      {t.icon}
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </nav>

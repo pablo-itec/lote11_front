@@ -58,7 +58,7 @@ export default async function TarjeteroGroupPage({
         </header>
 
         {people.length === 0 ? (
-          <p className="text-center py-16 text-[12px] text-brand-cream/30">Todavía no hay personal en este rubro.</p>
+          <p className="text-center py-16 text-[12px] text-brand-cream/30">Todavía no hay ítems en este grupo.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {people.map((p) => (
