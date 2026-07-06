@@ -1,4 +1,4 @@
-import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection } from '@/src/types';
+import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection, Cover } from '@/src/types';
 
 // Única fuente de verdad para la URL del backend.
 // Server (SSR/server components): prioriza API_URL; cae a NEXT_PUBLIC_API_URL.
@@ -132,6 +132,16 @@ export const tarjeteroApi = {
   updatePerson: (id: number, formData: FormData) =>
     req<TarjeteroPerson>('PATCH', `/tarjetero/people/${id}`, formData, true),
   removePerson: (id: number) => req<void>('DELETE', `/tarjetero/people/${id}`),
+};
+
+export const coversApi = {
+  getActive: () => req<Cover | null>('GET', '/covers/active'),
+  getAll: () => req<Cover[]>('GET', '/covers/admin/all'),
+  create: (formData: FormData) => req<Cover>('POST', '/covers', formData, true),
+  update: (id: number, formData: FormData) =>
+    req<Cover>('PATCH', `/covers/${id}`, formData, true),
+  activate: (id: number) => req<Cover>('PATCH', `/covers/${id}/activate`),
+  remove: (id: number) => req<void>('DELETE', `/covers/${id}`),
 };
 
 export const importanceApi = {
