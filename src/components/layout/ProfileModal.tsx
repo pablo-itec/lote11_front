@@ -1,24 +1,50 @@
 "use client";
 // src/components/layout/ProfileModal.tsx
 
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Mail, MapPin, Briefcase } from "lucide-react";
+import { X, AtSign } from "lucide-react";
 import LiquidButton from "@/src/components/ui/LiquidButton";
-
-const EDITOR = {
-  name:     "Valentina Rossi",
-  role:     "Editora Jefe — LOTE 11",
-  bio:      "Especialista en tendencias de Real Estate de lujo y arquitectura sustentable con más de 10 años de experiencia en el mercado global.",
-  email:    "v.rossi@lote11.digital",
-  location: "Buenos Aires, AR",
-};
+import { coversApi } from "@/src/lib/api";
+import type { Cover } from "@/src/types";
+import { imgSrc } from "@/src/lib/utils";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
+// Normaliza el valor de instagram a un link al perfil.
+// Acepta URL completa o handle (con o sin @).
+function instagramHref(value: string): string {
+  const v = value.trim();
+  if (/^https?:\/\//i.test(v)) return v;
+  return `https://instagram.com/${v.replace(/^@/, "")}`;
+}
+
+function instagramLabel(value: string): string {
+  const v = value.trim();
+  if (/^https?:\/\//i.test(v)) {
+    const handle = v.replace(/\/+$/, "").split("/").pop();
+    return handle ? `@${handle}` : v;
+  }
+  return `@${v.replace(/^@/, "")}`;
+}
+
 export default function ProfileModal({ open, onClose }: Props) {
+  const [data, setData] = useState<Cover | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!open || loaded) return;
+    coversApi
+      .getActive()
+      .then((res) => setData(res && (res as Cover).name ? (res as Cover) : null))
+      .catch(() => setData(null))
+      .finally(() => setLoaded(true));
+  }, [open, loaded]);
+
   return (
     <AnimatePresence>
       {open && (
@@ -33,8 +59,8 @@ export default function ProfileModal({ open, onClose }: Props) {
           <motion.div
             key="box"
             initial={{ scale: 0.9, y: 24 }}
-            animate={{ scale: 1,   y: 0  }}
-            exit={{   scale: 0.9, y: 24  }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 24 }}
             transition={{ type: "spring", stiffness: 120, damping: 18 }}
             onClick={(e) => e.stopPropagation()}
             className="glass-panel w-full max-w-[900px] max-h-[90vh] rounded-[48px] overflow-hidden relative grid md:grid-cols-[5fr_7fr] shadow-2xl"
@@ -49,7 +75,17 @@ export default function ProfileModal({ open, onClose }: Props) {
 
             {/* Imagen */}
             <div className="relative min-h-[280px] md:min-h-[500px] bg-gradient-to-br from-[#3a2018] to-[#241408] flex items-center justify-center text-[80px]">
-              🧑‍💼
+              {data?.imageUrl ? (
+                <Image
+                  src={imgSrc(data.imageUrl)}
+                  alt={data.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 375px"
+                />
+              ) : (
+                "🧑‍💼"
+              )}
               <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#241408]/90 to-transparent" />
             </div>
 
@@ -57,27 +93,54 @@ export default function ProfileModal({ open, onClose }: Props) {
             <div className="p-10 md:p-14 flex flex-col justify-center gap-6 overflow-y-auto">
               <div>
                 <p className="text-[8px] font-bold tracking-[0.25em] text-brand-red uppercase mb-3">
-                  Meet the Editor
+                  Tapa del mes
                 </p>
-                <h2 className="font-serif text-5xl font-black text-brand-brown leading-[0.9] tracking-tight mb-2">
-                  {EDITOR.name}
-                </h2>
-                <p className="text-sm text-brand-cream/60 font-light">{EDITOR.role}</p>
+
+                {!loaded ? (
+                  <p className="text-sm text-brand-cream/40">Cargando…</p>
+                ) : !data ? (
+                  <p className="text-sm text-brand-cream/50">
+                    Todavía no hay una tapa publicada.
+                  </p>
+                ) : (
+                  <>
+                    <h2 className="font-serif text-5xl font-black text-brand-brown leading-[0.9] tracking-tight mb-2">
+                      {data.name}
+                    </h2>
+                    {data.role && (
+                      <p className="text-sm text-brand-cream/60 font-light">{data.role}</p>
+                    )}
+                  </>
+                )}
               </div>
 
-              <p className="text-xs text-brand-cream/50 leading-relaxed max-w-sm">
-                {EDITOR.bio}
-              </p>
+              {data && (
+                <>
+                  {data.quote && (
+                    <p className="text-xs text-brand-cream/50 leading-relaxed max-w-sm">
+                      {data.quote}
+                    </p>
+                  )}
 
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-[11px] text-brand-cream/45">
-                <span className="flex items-center gap-2"><Mail size={13} className="text-brand-brown" />{EDITOR.email}</span>
-                <span className="flex items-center gap-2"><Briefcase size={13} className="text-brand-brown" />Real Estate</span>
-                <span className="flex items-center gap-2"><MapPin size={13} className="text-brand-brown" />{EDITOR.location}</span>
-              </div>
+                  {data.instagram && (
+                    <a
+                      href={instagramHref(data.instagram)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-[11px] text-brand-cream/50 hover:text-brand-cream transition-colors w-fit"
+                    >
+                      <AtSign size={13} className="text-brand-brown" />
+                      {instagramLabel(data.instagram)}
+                    </a>
+                  )}
 
-              <div className="pt-2">
-                <LiquidButton>Ver Artículos Publicados</LiquidButton>
-              </div>
+                  {data.articleUrl && (
+                    <div className="pt-2">
+                      <LiquidButton href={data.articleUrl}>Leer la nota</LiquidButton>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </motion.div>
         </motion.div>

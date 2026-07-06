@@ -8,6 +8,7 @@ import { Plus, X, Image as ImageIcon, Users, ArrowLeft, Layers, Contact } from "
 import { tarjeteroApi } from "@/src/lib/api";
 import type { TarjeteroGroup, TarjeteroPerson, TarjeteroSection } from "@/src/types";
 import { imgSrc } from "@/src/lib/utils";
+import ImageCropperModal from "@/src/components/ui/ImageCropperModal";
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
@@ -18,6 +19,10 @@ const EMPTY_PERSON = { name: "", role: "", email: "", order: 0, active: true };
 const EMPTY_SECTION = { name: "", slug: "", description: "", priority: 0, active: true };
 
 const ACCEPT = "image/jpeg,image/png,image/gif,image/webp";
+
+// Formatos en que se muestran las imágenes en el front público.
+const CROP_ASPECT_GROUP = 16 / 9; // banda horizontal de la card del rubro
+const CROP_ASPECT_PERSON = 1; // avatar cuadrado (se muestra circular)
 
 type View = "grupos" | "secciones";
 
@@ -118,6 +123,7 @@ function GroupsPanel({
   const [form, setForm]           = useState({ ...EMPTY_GROUP });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [cropSrc, setCropSrc]     = useState("");
   const [saving, setSaving]       = useState(false);
   const fileRef                   = useRef<HTMLInputElement>(null);
 
@@ -149,8 +155,14 @@ function GroupsPanel({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setCropSrc(URL.createObjectURL(file));
+    e.target.value = "";
+  };
+
+  const handleCropConfirm = (file: File) => {
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
+    setCropSrc("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -309,6 +321,15 @@ function GroupsPanel({
           )}
         </div>
       </div>
+
+      {cropSrc && (
+        <ImageCropperModal
+          src={cropSrc}
+          aspect={CROP_ASPECT_GROUP}
+          onConfirm={handleCropConfirm}
+          onCancel={() => setCropSrc("")}
+        />
+      )}
     </div>
   );
 }
@@ -519,6 +540,7 @@ function PeoplePanel({
   const [form, setForm]           = useState({ ...EMPTY_PERSON });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [cropSrc, setCropSrc]     = useState("");
   const [saving, setSaving]       = useState(false);
   const fileRef                   = useRef<HTMLInputElement>(null);
 
@@ -549,8 +571,14 @@ function PeoplePanel({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setCropSrc(URL.createObjectURL(file));
+    e.target.value = "";
+  };
+
+  const handleCropConfirm = (file: File) => {
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
+    setCropSrc("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -634,9 +662,17 @@ function PeoplePanel({
               </button>
               {previewUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={previewUrl} alt="Preview" className="mt-2 rounded-xl object-cover" style={{ width: 96, height: 96 }} />
+                <img src={previewUrl} alt="Preview" className="mt-2 rounded-full object-cover" style={{ width: 96, height: 96 }} />
               )}
             </div>
+            {cropSrc && (
+              <ImageCropperModal
+                src={cropSrc}
+                aspect={CROP_ASPECT_PERSON}
+                onConfirm={handleCropConfirm}
+                onCancel={() => setCropSrc("")}
+              />
+            )}
             <div className="sm:col-span-2 flex gap-3 pt-1">
               <button type="submit" disabled={saving} className="abtn abtn-edit px-5 py-2">
                 {saving ? "Guardando..." : editingId ? "Guardar" : "Crear"}

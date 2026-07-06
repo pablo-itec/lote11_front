@@ -115,6 +115,20 @@ export interface TarjeteroSection {
   updatedAt: string | null;
 }
 
+// Tapa del mes. El back devuelve la activa en /covers/active.
+export interface Cover {
+  id: number;
+  name: string;
+  role?: string;
+  quote?: string;
+  imageUrl?: string;
+  instagram?: string;
+  articleUrl?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewsMetrics {
   totalClicks: number;
   ranking: Pick<News, 'id' | 'title' | 'slug' | 'clicks' | 'status'>[];

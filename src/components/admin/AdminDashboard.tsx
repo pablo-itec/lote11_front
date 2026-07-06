@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, Newspaper, Users, Tag, BarChart2, Megaphone, TrendingUp, GalleryHorizontalEnd, Contact } from "lucide-react";
+import { LogOut, Newspaper, Users, Tag, BarChart2, Megaphone, TrendingUp, GalleryHorizontalEnd, Contact, BookImage } from "lucide-react";
 import { auth } from "@/src/lib/api";
 import NewsManager          from "./NewsManager";
 import SubscribersManager   from "./SubscribersManager";
@@ -12,8 +12,9 @@ import AdsManager           from "./AdsManager";
 import MetricsManager       from "./MetricsManager";
 import CarouselManager      from "./CarouselManager";
 import TarjeteroManager     from "./TarjeteroManager";
+import CoversManager        from "./CoversManager";
 
-type Tab = "news" | "subscribers" | "topics" | "importance" | "ads" | "metrics" | "carousel" | "tarjetero";
+type Tab = "news" | "subscribers" | "topics" | "importance" | "ads" | "metrics" | "carousel" | "tarjetero" | "covers";
 
 interface Props {
   onLogout: () => void;
@@ -35,6 +36,7 @@ const TAB_GROUPS: { label: string; tabs: TabDef[] }[] = [
       { id: "news",       label: "Noticias",   icon: <Newspaper size={14} /> },
       { id: "topics",     label: "Temas",      icon: <Tag size={14} /> },
       { id: "importance", label: "Importancia", icon: <BarChart2 size={14} /> },
+      { id: "covers",     label: "Tapa del mes", icon: <BookImage size={14} /> },
     ],
   },
   {
@@ -128,6 +130,7 @@ export default function AdminDashboard({ onLogout }: Props) {
         {tab === "subscribers" && <SubscribersManager onToast={addToast} />}
         {tab === "topics"      && <TopicsManager onToast={addToast} />}
         {tab === "importance"  && <ImportanceManager onToast={addToast} />}
+        {tab === "covers"      && <CoversManager onToast={addToast} />}
         {tab === "ads"         && <AdsManager onToast={addToast} />}
         {tab === "metrics"     && <MetricsManager onToast={addToast} />}
         {tab === "carousel"    && <CarouselManager onToast={addToast} />}
