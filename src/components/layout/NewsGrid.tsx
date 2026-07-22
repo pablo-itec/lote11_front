@@ -65,21 +65,21 @@ function NewsCard({ news, onClick }: { news: News; onClick: () => void }) {
         )}
       </div>
 
-      <div className="p-6 flex flex-col flex-1">
+      <div className="p-5 flex flex-col flex-1">
         {news.importanceLevel && (
-          <span className="kicker mb-3">
+          <span className="kicker mb-2">
             Niv.{news.importanceLevel.level} · {news.importanceLevel.label}
           </span>
         )}
-        <h3 className="font-serif text-[18px] font-bold text-brand-brown leading-snug mb-2 line-clamp-2">
+        <h3 className="font-serif text-[16px] font-bold text-brand-brown leading-snug mb-2 line-clamp-2">
           {news.title}
         </h3>
         {news.subtitle && (
-          <p className="text-[10px] text-brand-cream/55 leading-relaxed flex-1 mb-2 line-clamp-2">
+          <p className="text-[10px] text-brand-cream/55 leading-relaxed mb-3 line-clamp-2">
             {news.subtitle}
           </p>
         )}
-        <p className="text-[9px] text-brand-cream/45 mb-4 font-medium">
+        <p className="text-[9px] text-brand-cream/45 font-medium mt-auto mb-3">
           {news.author && <span className="text-brand-cream/60">{news.author} · </span>}
           {fmt(news.createdAt)}
           {news.readTime && ` · ${news.readTime} min`}
@@ -87,7 +87,7 @@ function NewsCard({ news, onClick }: { news: News; onClick: () => void }) {
         <Link
           href={`/noticias/${news.slug}`}
           onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-2 px-7 py-[10px] rounded-full text-[9px] font-bold tracking-[0.2em] uppercase transition-colors bg-brand-cream/[0.07] border border-brand-cream/15 text-brand-cream/60 hover:bg-brand-cream/15 hover:text-brand-cream"
+          className="self-start inline-flex items-center gap-2 px-6 py-[9px] rounded-full text-[9px] font-bold tracking-[0.2em] uppercase transition-colors bg-brand-cream/[0.07] border border-brand-cream/15 text-brand-cream/60 hover:bg-brand-cream/15 hover:text-brand-cream"
         >
           Leer →
         </Link>

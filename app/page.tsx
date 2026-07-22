@@ -13,6 +13,7 @@ import NewsDetailModal  from "@/src/components/layout/NewsDetailModal";
 import ProfileModal     from "@/src/components/layout/ProfileModal";
 import Footer           from "@/src/components/layout/Footer";
 import AdSidebar        from "@/src/components/ads/AdSidebar";
+import LogoBanner       from "@/src/components/layout/LogoBanner";
 
 import { newsApi, topicsApi, importanceApi } from "@/src/lib/api";
 import type { News, Topic, ImportanceLevel } from "@/src/types";
@@ -124,7 +125,12 @@ export default function Home() {
       <Navbar onProfileClick={() => setProfileOpen(true)} />
 
       {/* ── ESPACIADO NAV ── */}
-      <div className="h-[100px]" />
+      <div className="h-[80px]" />
+
+      {/* ── LOGO BANNER ── */}
+      <div className="flex justify-center mb-4 mt-2">
+        <LogoBanner />
+      </div>
 
       {/* ── TICKER ── */}
       <div className="max-w-[1080px] mx-auto px-5 mb-3">
@@ -136,7 +142,7 @@ export default function Home() {
         Visibles sólo en pantallas >= 1400px para que no pisen el contenido.
       */}
       <aside
-        className="side-rail side-rail-left hidden min-[1400px]:block"
+        className="side-rail side-rail-left hidden min-[1280px]:block"
         style={{ top: `${leftTop}px` }}
         aria-label="Publicidad lateral izquierda"
       >
@@ -145,7 +151,7 @@ export default function Home() {
         </div>
       </aside>
       <aside
-        className="side-rail side-rail-right hidden min-[1400px]:block"
+        className="side-rail side-rail-right hidden min-[1280px]:block"
         style={{ top: `${rightTop}px` }}
         aria-label="Publicidad lateral derecha"
       >
@@ -185,7 +191,7 @@ export default function Home() {
         <SubscribeSection />
 
         {/* Fallback de ads en pantallas chicas (< 1400px) */}
-        <div className="min-[1400px]:hidden grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+        <div className="min-[1280px]:hidden grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
           <AdSidebar side="left" />
           <AdSidebar side="right" />
         </div>
