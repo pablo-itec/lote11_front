@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Trash2 } from "lucide-react";
 import { newsApi, topicsApi, importanceApi } from "@/src/lib/api";
 import { imgSrc, fmt } from "@/src/lib/utils";
-import type { News, Topic, ImportanceLevel } from "@/src/types";
+import type { News, NewsImage, Topic, ImportanceLevel } from "@/src/types";
+
+const MAX_GALLERY_IMAGES = 10;
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
@@ -32,6 +34,9 @@ export default function NewsManager({ onToast }: Props) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [saving, setSaving]         = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [galleryImages, setGalleryImages]     = useState<NewsImage[]>([]);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const galleryFileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     setLoading(true);
@@ -57,6 +62,7 @@ export default function NewsManager({ onToast }: Props) {
     setEditingId(null);
     setForm({ ...EMPTY_FORM });
     setPreviewUrl(null);
+    setGalleryImages([]);
     if (fileRef.current) fileRef.current.value = "";
     setShowForm(true);
   };
@@ -77,8 +83,42 @@ export default function NewsManager({ onToast }: Props) {
       imageCaption: n.imageCaption ?? "",
     });
     setPreviewUrl(n.imageUrl ? imgSrc(n.imageUrl) : null);
+    setGalleryImages(n.images ?? []);
     if (fileRef.current) fileRef.current.value = "";
     setShowForm(true);
+  };
+
+  const handleAddGalleryImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !editingId) return;
+    if (galleryImages.length >= MAX_GALLERY_IMAGES) {
+      onToast(`Máximo ${MAX_GALLERY_IMAGES} imágenes por noticia`, false);
+      return;
+    }
+    setGalleryUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const created = await newsApi.addImage(editingId, fd);
+      setGalleryImages((prev) => [...prev, created]);
+      onToast("Imagen agregada a la galería", true);
+    } catch (err) {
+      onToast((err as Error).message, false);
+    } finally {
+      setGalleryUploading(false);
+    }
+  };
+
+  const handleRemoveGalleryImage = async (imageId: number) => {
+    if (!confirm("¿Eliminar esta imagen de la galería?")) return;
+    try {
+      await newsApi.removeImage(imageId);
+      setGalleryImages((prev) => prev.filter((img) => img.id !== imageId));
+      onToast("Imagen eliminada", true);
+    } catch (err) {
+      onToast((err as Error).message, false);
+    }
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,6 +277,44 @@ export default function NewsManager({ onToast }: Props) {
             <div>
               <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Epígrafe imagen</label>
               <input value={form.imageCaption} onChange={f("imageCaption")} className="glass-input" placeholder="Descripción de la imagen" />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">
+                Galería (carrusel) — se muestra junto a la portada si hay más de 1 imagen en total
+              </label>
+              {!editingId ? (
+                <p className="text-[11px] text-brand-cream/30">Guardá la noticia primero para poder agregar imágenes a la galería.</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {galleryImages.map((img) => (
+                      <div key={img.id} className="relative h-[80px] w-[80px] rounded-[10px] overflow-hidden border border-white/10 group">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imgSrc(img.imageUrl)} alt={img.caption ?? ""} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryImage(img.id)}
+                          className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 size={11} className="text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    ref={galleryFileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAddGalleryImage}
+                    disabled={galleryUploading || galleryImages.length >= MAX_GALLERY_IMAGES}
+                    className="glass-input file:mr-3 file:px-3 file:py-1 file:rounded-full file:border-0 file:text-[9px] file:font-bold file:bg-brand-brown/30 file:text-brand-cream/70 cursor-pointer disabled:opacity-40"
+                  />
+                  <p className="text-[9px] text-brand-cream/30 mt-1">
+                    {galleryUploading ? "Subiendo..." : `${galleryImages.length}/${MAX_GALLERY_IMAGES} imágenes`}
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="md:col-span-2 flex gap-3 pt-2">

@@ -1,4 +1,4 @@
-import type { News, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection, Cover } from '@/src/types';
+import type { News, NewsImage, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection, Cover } from '@/src/types';
 
 // Única fuente de verdad para la URL del backend.
 // Server (SSR/server components): prioriza API_URL; cae a NEXT_PUBLIC_API_URL.
@@ -70,6 +70,11 @@ export const newsApi = {
   toggleFeatured: (id: number) => req<News>('PATCH', `/news/${id}/featured`),
   registerClick: (id: number) => req<{ id: number; clicks: number }>('PATCH', `/news/${id}/click`),
   remove: (id: number) => req<void>('DELETE', `/news/${id}`),
+  addImage: (newsId: number, formData: FormData) =>
+    req<NewsImage>('POST', `/news/${newsId}/images`, formData, true),
+  updateImage: (imageId: number, formData: FormData) =>
+    req<NewsImage>('PATCH', `/news/images/${imageId}`, formData, true),
+  removeImage: (imageId: number) => req<void>('DELETE', `/news/images/${imageId}`),
 };
 
 export const metricsApi = {

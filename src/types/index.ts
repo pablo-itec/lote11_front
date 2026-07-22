@@ -14,6 +14,14 @@ export interface ImportanceLevel {
   notifySubscribers: boolean;
 }
 
+export interface NewsImage {
+  id: number;
+  newsId: number;
+  imageUrl: string;
+  caption?: string;
+  order: number;
+}
+
 export interface News {
   id: number;
   title: string;
@@ -23,6 +31,7 @@ export interface News {
   slug?: string;
   imageUrl?: string;
   imageCaption?: string;
+  images?: NewsImage[];
   tags?: string[];
   status: 'draft' | 'published';
   featured: boolean;
