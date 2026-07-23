@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Clock, User, Tag, ArrowRight } from "lucide-react";
 import type { News } from "@/src/types";
-import { fmt, imgSrc } from "@/src/lib/utils";
+import { fmt, newsSlides } from "@/src/lib/utils";
 import { newsApi } from "@/src/lib/api";
+import NewsImageCarousel from "./NewsImageCarousel";
 
 interface Props {
   news: News | null;
@@ -19,6 +19,8 @@ export default function NewsDetailModal({ news, onClose }: Props) {
   useEffect(() => {
     if (news?.id) newsApi.registerClick(news.id).catch(() => {});
   }, [news?.id]);
+
+  const slides = news ? newsSlides(news) : [];
 
   return (
     <AnimatePresence>
@@ -49,20 +51,9 @@ export default function NewsDetailModal({ news, onClose }: Props) {
             </button>
 
             {/* Image */}
-            {news.imageUrl && (
+            {slides.length > 0 && (
               <div className="relative h-[240px] sm:h-[300px] overflow-hidden rounded-t-[44px]">
-                <Image
-                  src={imgSrc(news.imageUrl)}
-                  alt={news.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                {news.imageCaption && (
-                  <p className="absolute bottom-4 left-6 text-[9px] text-brand-cream/50 font-medium">
-                    {news.imageCaption}
-                  </p>
-                )}
+                <NewsImageCarousel slides={slides} alt={news.title} />
               </div>
             )}
 

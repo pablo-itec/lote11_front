@@ -8,6 +8,12 @@ import { imgSrc, fmt } from "@/src/lib/utils";
 import type { News, NewsImage, Topic, ImportanceLevel } from "@/src/types";
 
 const MAX_GALLERY_IMAGES = 10;
+const MAX_TOTAL_IMAGES = MAX_GALLERY_IMAGES + 1; // portada + galería
+
+interface StagedImage {
+  file: File;
+  previewUrl: string;
+}
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
@@ -31,10 +37,10 @@ export default function NewsManager({ onToast }: Props) {
   const [showForm, setShowForm]     = useState(false);
   const [editingId, setEditingId]   = useState<number | null>(null);
   const [form, setForm]             = useState({ ...EMPTY_FORM });
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [saving, setSaving]         = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [coverUrl, setCoverUrl]     = useState<string | null>(null);
   const [galleryImages, setGalleryImages]     = useState<NewsImage[]>([]);
+  const [galleryStagedFiles, setGalleryStagedFiles] = useState<StagedImage[]>([]);
   const [galleryUploading, setGalleryUploading] = useState(false);
   const galleryFileRef = useRef<HTMLInputElement>(null);
 
@@ -58,12 +64,24 @@ export default function NewsManager({ onToast }: Props) {
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const resetStagedGallery = () => {
+    setGalleryStagedFiles((prev) => {
+      prev.forEach((s) => URL.revokeObjectURL(s.previewUrl));
+      return [];
+    });
+  };
+
+  const closeForm = () => {
+    resetStagedGallery();
+    setShowForm(false);
+  };
+
   const openCreate = () => {
     setEditingId(null);
     setForm({ ...EMPTY_FORM });
-    setPreviewUrl(null);
+    setCoverUrl(null);
     setGalleryImages([]);
-    if (fileRef.current) fileRef.current.value = "";
+    resetStagedGallery();
     setShowForm(true);
   };
 
@@ -82,32 +100,70 @@ export default function NewsManager({ onToast }: Props) {
       tags: (n.tags ?? []).join(", "),
       imageCaption: n.imageCaption ?? "",
     });
-    setPreviewUrl(n.imageUrl ? imgSrc(n.imageUrl) : null);
+    setCoverUrl(n.imageUrl ?? null);
     setGalleryImages(n.images ?? []);
-    if (fileRef.current) fileRef.current.value = "";
+    resetStagedGallery();
     setShowForm(true);
   };
 
-  const handleAddGalleryImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file || !editingId) return;
-    if (galleryImages.length >= MAX_GALLERY_IMAGES) {
-      onToast(`Máximo ${MAX_GALLERY_IMAGES} imágenes por noticia`, false);
-      return;
-    }
-    setGalleryUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("image", file);
-      const created = await newsApi.addImage(editingId, fd);
-      setGalleryImages((prev) => [...prev, created]);
-      onToast("Imagen agregada a la galería", true);
-    } catch (err) {
-      onToast((err as Error).message, false);
-    } finally {
+  // La primera imagen que se sube (portada libre) queda como portada; el resto entra a la galería.
+  // Si ya existe la noticia (edit), sube directo; si no (create), guarda localmente
+  // y se sube recién cuando se crea la noticia en handleSubmit.
+  const handleGalleryFiles = async (files: File[]) => {
+    let imageFiles = files.filter((file) => file.type.startsWith("image/"));
+    if (imageFiles.length === 0) return;
+
+    if (editingId) {
+      setGalleryUploading(true);
+      if (!coverUrl && imageFiles.length > 0) {
+        const [first, ...rest] = imageFiles;
+        imageFiles = rest;
+        try {
+          const fd = new FormData();
+          fd.append("image", first);
+          const updated = await newsApi.update(editingId, fd);
+          setCoverUrl(updated.imageUrl ?? null);
+        } catch (err) {
+          onToast((err as Error).message, false);
+        }
+      }
+      const room = MAX_GALLERY_IMAGES - galleryImages.length;
+      if (imageFiles.length > room) {
+        onToast(`Máximo ${MAX_GALLERY_IMAGES} imágenes en la galería`, false);
+      }
+      for (const file of imageFiles.slice(0, Math.max(room, 0))) {
+        try {
+          const fd = new FormData();
+          fd.append("image", file);
+          const created = await newsApi.addImage(editingId, fd);
+          setGalleryImages((prev) => [...prev, created]);
+        } catch (err) {
+          onToast((err as Error).message, false);
+        }
+      }
       setGalleryUploading(false);
+    } else {
+      const room = MAX_TOTAL_IMAGES - galleryStagedFiles.length;
+      if (room <= 0) {
+        onToast(`Máximo ${MAX_TOTAL_IMAGES} imágenes por noticia`, false);
+        return;
+      }
+      const toStage = imageFiles
+        .slice(0, room)
+        .map((file) => ({ file, previewUrl: URL.createObjectURL(file) }));
+      setGalleryStagedFiles((prev) => [...prev, ...toStage]);
     }
+  };
+
+  const handleGalleryFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    await handleGalleryFiles(files);
+  };
+
+  const handleGalleryDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    await handleGalleryFiles(Array.from(e.dataTransfer.files));
   };
 
   const handleRemoveGalleryImage = async (imageId: number) => {
@@ -121,12 +177,12 @@ export default function NewsManager({ onToast }: Props) {
     }
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setPreviewUrl(ev.target?.result as string);
-    reader.readAsDataURL(file);
+  const handleRemoveStagedFile = (index: number) => {
+    setGalleryStagedFiles((prev) => {
+      const removed = prev[index];
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,18 +200,29 @@ export default function NewsManager({ onToast }: Props) {
     if (form.tags) fd.append("tags", form.tags);
     if (form.importanceLevelId) fd.append("importanceLevelId", form.importanceLevelId);
     if (form.topicId) fd.append("topicId", form.topicId);
-    const file = fileRef.current?.files?.[0];
-    if (file) fd.append("image", file);
+    // La primera imagen subida (staged) es la portada; el resto va a la galería tras crear.
+    if (!editingId && galleryStagedFiles.length > 0) {
+      fd.append("image", galleryStagedFiles[0].file);
+    }
 
     try {
       if (editingId) {
         await newsApi.update(editingId, fd);
         onToast("Noticia actualizada", true);
       } else {
-        await newsApi.create(fd);
+        const created = await newsApi.create(fd);
         onToast("Noticia creada", true);
+        for (const staged of galleryStagedFiles.slice(1)) {
+          try {
+            const gfd = new FormData();
+            gfd.append("image", staged.file);
+            await newsApi.addImage(created.id, gfd);
+          } catch (err) {
+            onToast(`Error subiendo imagen de galería: ${(err as Error).message}`, false);
+          }
+        }
       }
-      setShowForm(false);
+      closeForm();
       load();
     } catch (err) {
       onToast((err as Error).message, false);
@@ -201,7 +268,7 @@ export default function NewsManager({ onToast }: Props) {
             <h3 className="text-[11px] font-bold tracking-[0.15em] text-brand-cream/60 uppercase">
               {editingId ? "Editar noticia" : "Nueva noticia"}
             </h3>
-            <button onClick={() => setShowForm(false)} className="text-brand-cream/30 hover:text-brand-cream transition-colors">
+            <button onClick={closeForm} className="text-brand-cream/30 hover:text-brand-cream transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -265,63 +332,85 @@ export default function NewsManager({ onToast }: Props) {
               </label>
             </div>
             <div className="md:col-span-2">
-              <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Imagen</label>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="glass-input file:mr-3 file:px-3 file:py-1 file:rounded-full file:border-0 file:text-[9px] file:font-bold file:bg-brand-brown/30 file:text-brand-cream/70 cursor-pointer" />
-              {previewUrl && (
-                <div className="relative mt-2 h-[120px] w-[200px] rounded-[12px] overflow-hidden border border-white/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={previewUrl} alt="preview" className="w-full h-full object-cover" />
-                </div>
-              )}
+              <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">
+                Imágenes — la primera que subís se muestra primero (portada); con más de 1 se arma un carrusel
+              </label>
+              {(() => {
+                const count = editingId ? (coverUrl ? 1 : 0) + galleryImages.length : galleryStagedFiles.length;
+                const atCap = count >= MAX_TOTAL_IMAGES;
+                return (
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleGalleryDrop}
+                    onClick={() => !atCap && galleryFileRef.current?.click()}
+                    className={`border border-dashed border-white/15 rounded-[14px] p-3 transition-colors ${atCap ? "opacity-40" : "cursor-pointer hover:border-white/30"}`}
+                  >
+                    <div className="flex flex-wrap gap-2 mb-1">
+                      {count === 0 && (
+                        <p className="text-[10px] text-brand-cream/30 py-2">
+                          Arrastrá imágenes acá o hacé click para seleccionar
+                        </p>
+                      )}
+                      {editingId && coverUrl && (
+                        <div className="relative h-[80px] w-[80px] rounded-[10px] overflow-hidden border border-white/10">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={imgSrc(coverUrl)} alt="Portada" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      {editingId
+                        ? galleryImages.map((img) => (
+                            <div key={img.id} className="relative h-[80px] w-[80px] rounded-[10px] overflow-hidden border border-white/10 group">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={imgSrc(img.imageUrl)} alt={img.caption ?? ""} className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleRemoveGalleryImage(img.id); }}
+                                className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 size={11} className="text-white" />
+                              </button>
+                            </div>
+                          ))
+                        : galleryStagedFiles.map((staged, i) => (
+                            <div key={staged.previewUrl} className="relative h-[80px] w-[80px] rounded-[10px] overflow-hidden border border-white/10 group">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={staged.previewUrl} alt="" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleRemoveStagedFile(i); }}
+                                className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 size={11} className="text-white" />
+                              </button>
+                            </div>
+                          ))}
+                    </div>
+                    <input
+                      ref={galleryFileRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleGalleryFileInput}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hidden"
+                    />
+                    <p className="text-[9px] text-brand-cream/30">
+                      {galleryUploading ? "Subiendo..." : `${count}/${MAX_TOTAL_IMAGES} imágenes`}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
             <div>
               <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Epígrafe imagen</label>
-              <input value={form.imageCaption} onChange={f("imageCaption")} className="glass-input" placeholder="Descripción de la imagen" />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">
-                Galería (carrusel) — se muestra junto a la portada si hay más de 1 imagen en total
-              </label>
-              {!editingId ? (
-                <p className="text-[11px] text-brand-cream/30">Guardá la noticia primero para poder agregar imágenes a la galería.</p>
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {galleryImages.map((img) => (
-                      <div key={img.id} className="relative h-[80px] w-[80px] rounded-[10px] overflow-hidden border border-white/10 group">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={imgSrc(img.imageUrl)} alt={img.caption ?? ""} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveGalleryImage(img.id)}
-                          className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={11} className="text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <input
-                    ref={galleryFileRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAddGalleryImage}
-                    disabled={galleryUploading || galleryImages.length >= MAX_GALLERY_IMAGES}
-                    className="glass-input file:mr-3 file:px-3 file:py-1 file:rounded-full file:border-0 file:text-[9px] file:font-bold file:bg-brand-brown/30 file:text-brand-cream/70 cursor-pointer disabled:opacity-40"
-                  />
-                  <p className="text-[9px] text-brand-cream/30 mt-1">
-                    {galleryUploading ? "Subiendo..." : `${galleryImages.length}/${MAX_GALLERY_IMAGES} imágenes`}
-                  </p>
-                </>
-              )}
+              <input value={form.imageCaption} onChange={f("imageCaption")} className="glass-input" placeholder="Descripción de la primera imagen" />
             </div>
 
             <div className="md:col-span-2 flex gap-3 pt-2">
               <button type="submit" disabled={saving} className="abtn abtn-edit px-6 py-2">
                 {saving ? "Guardando..." : editingId ? "Guardar cambios" : "Crear noticia"}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="abtn abtn-del px-6 py-2">
+              <button type="button" onClick={closeForm} className="abtn abtn-del px-6 py-2">
                 Cancelar
               </button>
             </div>
