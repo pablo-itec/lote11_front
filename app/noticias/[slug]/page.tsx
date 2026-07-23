@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, User, Tag, ArrowLeft } from "lucide-react";
 import type { News } from "@/src/types";
-import { fmt, imgSrc } from "@/src/lib/utils";
+import { fmt, newsSlides } from "@/src/lib/utils";
 import { API_BASE } from "@/src/lib/api";
+import NewsImageCarousel from "@/src/components/layout/NewsImageCarousel";
 
 async function getNews(slug: string): Promise<News | null> {
   try {
@@ -26,6 +26,7 @@ export default async function NewsPage({
   const { slug } = await params;
   const news = await getNews(slug);
   if (!news) notFound();
+  const slides = newsSlides(news);
 
   return (
     <div className="min-h-screen">
@@ -40,21 +41,9 @@ export default async function NewsPage({
 
       <article className="max-w-[760px] mx-auto px-6 py-6 pb-16">
         <div className="glass-panel rounded-[44px] overflow-hidden">
-          {news.imageUrl && (
+          {slides.length > 0 && (
             <div className="relative h-[240px] sm:h-[320px] overflow-hidden rounded-t-[44px]">
-              <Image
-                src={imgSrc(news.imageUrl)}
-                alt={news.title}
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              {news.imageCaption && (
-                <p className="absolute bottom-4 left-6 text-[9px] text-brand-cream/50 font-medium">
-                  {news.imageCaption}
-                </p>
-              )}
+              <NewsImageCarousel slides={slides} alt={news.title} priority />
             </div>
           )}
 
