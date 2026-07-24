@@ -39,6 +39,16 @@ export default function SubscribersManager({ onToast }: Props) {
     }
   };
 
+  const activate = async (id: number) => {
+    try {
+      await subscribersApi.activate(id);
+      onToast("Suscriptor activado", true);
+      load(search);
+    } catch (err) {
+      onToast((err as Error).message, false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -91,9 +101,13 @@ export default function SubscribersManager({ onToast }: Props) {
                       </span>
                     </td>
                     <td>
-                      {s.active && (
+                      {s.active ? (
                         <button onClick={() => deactivate(s.id)} className="abtn abtn-del">
                           Dar de baja
+                        </button>
+                      ) : (
+                        <button onClick={() => activate(s.id)} className="abtn abtn-pub">
+                          Reactivar
                         </button>
                       )}
                     </td>

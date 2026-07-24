@@ -98,10 +98,19 @@ export default function Home() {
     const compute = () => {
       const footer = footerRef.current?.getBoundingClientRect();
       if (!footer) return;
+      const scrollY = window.scrollY;
       const leftH = leftRailRef.current?.offsetHeight ?? 0;
       const rightH = rightRailRef.current?.offsetHeight ?? 0;
-      setLeftTop(Math.min(BASE_TOP, footer.top - leftH - GAP));
-      setRightTop(Math.min(BASE_TOP, footer.top - rightH - GAP));
+
+      // Mientras el footer está lejos, el rail fluye 1:1 con el scroll (baja/sube junto
+      // con las noticias, como cualquier otro bloque de la página). Recién cuando el
+      // footer se acerca lo suficiente como para que se solaparía si se quedara quieto
+      // en BASE_TOP, se ancla ahí y lo va esquivando (igual que antes).
+      const flowTop = BASE_TOP - scrollY;
+      const footerLimitLeft = footer.top - leftH - GAP;
+      const footerLimitRight = footer.top - rightH - GAP;
+      setLeftTop(footerLimitLeft < BASE_TOP ? footerLimitLeft : flowTop);
+      setRightTop(footerLimitRight < BASE_TOP ? footerLimitRight : flowTop);
     };
 
     const onScroll = () => {
