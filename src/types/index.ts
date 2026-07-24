@@ -52,16 +52,30 @@ export interface Subscriber {
   unsubscribeToken?: string;
 }
 
+export interface AdImage {
+  id: number;
+  imageUrl: string;
+  order: number;
+}
+
+export interface AdLibraryImage {
+  id: number;
+  imageUrl: string;
+  size: 'large' | 'small';
+  label?: string;
+  createdAt: string;
+}
+
 export interface Ad {
   id: number;
   side: 'left' | 'right';
   size: 'large' | 'small';
-  imageUrl: string;
   linkUrl?: string;
   displayDuration: number;
   startsAt?: string;
   endsAt?: string;
   order: number;
+  images?: AdImage[];
   createdAt: string;
   updatedAt: string;
 }

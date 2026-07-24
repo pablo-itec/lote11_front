@@ -1,4 +1,4 @@
-import type { News, NewsImage, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection, Cover } from '@/src/types';
+import type { News, NewsImage, Topic, ImportanceLevel, Subscriber, PaginatedResponse, Ad, AdLibraryImage, NewsMetrics, CarouselItem, TarjeteroGroup, TarjeteroPerson, TarjeteroSection, Cover } from '@/src/types';
 
 // Única fuente de verdad para la URL del backend.
 // Server (SSR/server components): prioriza API_URL; cae a NEXT_PUBLIC_API_URL.
@@ -98,6 +98,7 @@ export const subscribersApi = {
   getAll: (search?: string, page?: number) =>
     req<PaginatedResponse<Subscriber>>('GET', `/subscribers?${buildQuery({ search, page })}`),
   deactivate: (id: number) => req<Subscriber>('PATCH', `/subscribers/${id}/deactivate`),
+  activate: (id: number) => req<Subscriber>('PATCH', `/subscribers/${id}/activate`),
 };
 
 export const topicsApi = {
@@ -107,14 +108,32 @@ export const topicsApi = {
   remove: (id: number) => req<void>('DELETE', `/topics/${id}`),
 };
 
+interface AdWritePayload {
+  side: 'left' | 'right';
+  size: 'large' | 'small';
+  linkUrl?: string;
+  displayDuration: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  libraryImageIds: number[];
+}
+
 export const adsApi = {
   getBySide: (side: 'left' | 'right') => req<Ad[]>('GET', `/ads/${side}`),
   getAdminAll: (side?: string) =>
     req<Ad[]>('GET', `/ads/admin/all${side ? `?side=${side}` : ''}`),
-  create: (formData: FormData) => req<Ad>('POST', '/ads', formData, true),
-  update: (id: number, formData: FormData) => req<Ad>('PATCH', `/ads/${id}`, formData, true),
+  create: (data: AdWritePayload) => req<Ad>('POST', '/ads', data),
+  update: (id: number, data: Partial<AdWritePayload>) =>
+    req<Ad>('PATCH', `/ads/${id}`, data),
   reorder: (id: number, newOrder: number) => req<Ad[]>('PATCH', `/ads/${id}/reorder`, { newOrder }),
   remove: (id: number) => req<void>('DELETE', `/ads/${id}`),
+};
+
+export const adLibraryApi = {
+  getAll: (size?: 'large' | 'small') =>
+    req<AdLibraryImage[]>('GET', `/ad-library${size ? `?size=${size}` : ''}`),
+  create: (formData: FormData) => req<AdLibraryImage>('POST', '/ad-library', formData, true),
+  remove: (id: number) => req<void>('DELETE', `/ad-library/${id}`),
 };
 
 export const tarjeteroApi = {
