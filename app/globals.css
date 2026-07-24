@@ -382,17 +382,17 @@ textarea.glass-input { resize: vertical; min-height: 90px; }
   animation: shimmer 2s linear infinite;
 }
 
-/* ── FIXED SIDE ADS RAIL ── */
+/* ── SIDE ADS RAIL ──
+   Sin max-height/overflow: si hay más anuncios de los que entran en pantalla, se
+   revelan todos naturalmente mientras el rail fluye con el scroll de la página
+   (ver el cálculo de `top` en app/page.tsx). Solo se ancla (position via `top`
+   inline) cerca del footer para no solaparlo. */
 .side-rail {
   position: fixed;
   top: 110px;
   width: 178px;
-  max-height: calc(100vh - 130px);
-  overflow-y: auto;
   z-index: 30;
-  scrollbar-width: none;
 }
-.side-rail::-webkit-scrollbar { display: none; }
 .side-rail-left  { left: 16px; }
 .side-rail-right { right: 16px; }
 
