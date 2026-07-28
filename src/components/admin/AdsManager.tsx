@@ -90,8 +90,7 @@ export default function AdsManager({ onToast }: Props) {
     }
     setSaving(true);
     try {
-      const payload = {
-        side: form.side,
+      const basePayload = {
         size: form.size,
         linkUrl: form.linkUrl || undefined,
         displayDuration: Number(form.displayDuration),
@@ -101,10 +100,10 @@ export default function AdsManager({ onToast }: Props) {
       };
 
       if (editingId) {
-        await adsApi.update(editingId, payload);
+        await adsApi.update(editingId, basePayload);
         onToast("Anuncio actualizado", true);
       } else {
-        await adsApi.create(payload);
+        await adsApi.create({ ...basePayload, side: form.side });
         onToast("Anuncio creado", true);
       }
       setShowForm(false);
