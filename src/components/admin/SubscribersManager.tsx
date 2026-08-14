@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { subscribersApi } from "@/src/lib/api";
 import { fmt } from "@/src/lib/utils";
 import type { Subscriber } from "@/src/types";
+import Pagination from "@/src/components/layout/Pagination";
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
@@ -14,12 +15,16 @@ export default function SubscribersManager({ onToast }: Props) {
   const [list, setList]       = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
+  const [page, setPage]       = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const load = async (q = "") => {
+  const load = async (q = "", p = 1) => {
     setLoading(true);
     try {
-      const res = await subscribersApi.getAll(q || undefined);
+      const res = await subscribersApi.getAll(q || undefined, p);
       setList(res.data ?? []);
+      setPage(res.meta?.page ?? 1);
+      setTotalPages(res.meta?.totalPages ?? 1);
     } catch (err) {
       onToast((err as Error).message, false);
     } finally {
@@ -29,11 +34,13 @@ export default function SubscribersManager({ onToast }: Props) {
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const search_ = () => load(search, 1);
+
   const deactivate = async (id: number) => {
     try {
       await subscribersApi.deactivate(id);
       onToast("Suscriptor dado de baja", true);
-      load(search);
+      load(search, page);
     } catch (err) {
       onToast((err as Error).message, false);
     }
@@ -43,7 +50,7 @@ export default function SubscribersManager({ onToast }: Props) {
     try {
       await subscribersApi.activate(id);
       onToast("Suscriptor activado", true);
-      load(search);
+      load(search, page);
     } catch (err) {
       onToast((err as Error).message, false);
     }
@@ -58,11 +65,11 @@ export default function SubscribersManager({ onToast }: Props) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && load(search)}
+            onKeyDown={(e) => e.key === "Enter" && search_()}
             placeholder="Buscar por email..."
             className="bg-transparent outline-none text-[11px] text-brand-cream/70 placeholder:text-brand-cream/20 w-40 font-sans"
           />
-          <button onClick={() => load(search)} className="text-brand-cream/30 hover:text-brand-brown transition-colors">
+          <button onClick={search_} className="text-brand-cream/30 hover:text-brand-brown transition-colors">
             <Search size={14} />
           </button>
         </div>
@@ -118,6 +125,13 @@ export default function SubscribersManager({ onToast }: Props) {
           )}
         </div>
       </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPrev={() => load(search, page - 1)}
+        onNext={() => load(search, page + 1)}
+      />
     </div>
   );
 }
