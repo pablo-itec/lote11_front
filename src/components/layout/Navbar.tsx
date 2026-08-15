@@ -9,12 +9,7 @@ interface NavbarProps {
   onProfileClick: () => void;
 }
 
-const NAV_LINKS = [
-  { label: "Inicio", href: "/" },
-  { label: "Podcasts", href: "#" },
-  { label: "Noticias", href: "#" },
-  { label: "Tarjetero", href: "/tarjetero" },
-];
+const NAV_LINKS = ["Inicio", "Podcasts", "Noticias", "Tendencias"];
 const HIDE_THRESHOLD = 120;
 
 export default function Navbar({ onProfileClick }: NavbarProps) {
@@ -49,11 +44,11 @@ export default function Navbar({ onProfileClick }: NavbarProps) {
       >
         {NAV_LINKS.map((link) => (
           <a
-            key={link.label}
-            href={link.href}
+            key={link}
+            href="#"
             className="text-[9px] font-bold tracking-[0.22em] text-brand-cream/65 uppercase hover:text-brand-brown transition-colors"
           >
-            {link.label}
+            {link}
           </a>
         ))}
       </nav>
