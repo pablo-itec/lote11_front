@@ -81,7 +81,7 @@ export default function NewsDetailModal({ news, onClose }: Props) {
 
               {/* Subtitle */}
               {news.subtitle && (
-                <p className="text-[13px] text-brand-cream/85 leading-relaxed mb-5 italic">
+                <p className="text-[13px] text-brand-cream/80 leading-relaxed mb-5 italic">
                   {news.subtitle}
                 </p>
               )}
