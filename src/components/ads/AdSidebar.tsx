@@ -42,12 +42,14 @@ export default function AdSidebar({ side }: Props) {
   return (
     <div className="flex flex-col gap-3">
       {ads.map((ad) => {
+        const imageUrl = ad.images?.[0]?.imageUrl;
+        if (!imageUrl) return null;
         const inner = (
           <div
             className={`ad-bubble glass-panel rounded-[28px] overflow-hidden relative w-full ${SIZE_ASPECT[ad.size]}`}
           >
             <Image
-              src={ad.imageUrl}
+              src={imageUrl}
               alt="Publicidad"
               fill
               className="object-cover"
