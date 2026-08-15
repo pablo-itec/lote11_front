@@ -75,12 +75,12 @@ function NewsCard({ news, onClick }: { news: News; onClick: () => void }) {
           {news.title}
         </h3>
         {news.subtitle && (
-          <p className="text-[10px] text-brand-cream/75 leading-relaxed mb-3 line-clamp-2">
+          <p className="text-[10px] text-brand-cream/55 leading-relaxed mb-3 line-clamp-2">
             {news.subtitle}
           </p>
         )}
-        <p className="text-[9px] text-brand-cream/60 font-medium mt-auto mb-3">
-          {news.author && <span className="text-brand-cream/80">{news.author} · </span>}
+        <p className="text-[9px] text-brand-cream/45 font-medium mt-auto mb-3">
+          {news.author && <span className="text-brand-cream/60">{news.author} · </span>}
           {fmt(news.createdAt)}
           {news.readTime && ` · ${news.readTime} min`}
         </p>
