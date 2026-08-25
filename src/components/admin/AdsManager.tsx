@@ -138,6 +138,16 @@ export default function AdsManager({ onToast }: Props) {
     setSelectedIds([]);
   };
 
+  // Mantiene sincronizado el selector de imágenes del form (arriba) con lo que se
+  // sube/borra desde la pestaña "Biblioteca", sin depender de un reload.
+  const handleLibraryImageAdded = (image: AdLibraryImage) => {
+    setLibraryImages((prev) => [image, ...prev]);
+  };
+  const handleLibraryImageRemoved = (id: number) => {
+    setLibraryImages((prev) => prev.filter((img) => img.id !== id));
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
+  };
+
   const sideAds = ads.filter((a) => a.side === filterSide);
   const pickerImages = libraryImages.filter((img) => img.size === form.size);
 
@@ -167,7 +177,13 @@ export default function AdsManager({ onToast }: Props) {
         </button>
       </div>
 
-      {view === "library" && <AdLibraryManager onToast={onToast} />}
+      {view === "library" && (
+        <AdLibraryManager
+          onToast={onToast}
+          onImageAdded={handleLibraryImageAdded}
+          onImageRemoved={handleLibraryImageRemoved}
+        />
+      )}
 
       {view === "ads" && (
       <div className="space-y-4">
