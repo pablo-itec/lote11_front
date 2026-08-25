@@ -8,6 +8,8 @@ import ImageCropperModal from "@/src/components/ui/ImageCropperModal";
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
+  onImageAdded?: (image: AdLibraryImage) => void;
+  onImageRemoved?: (id: number) => void;
 }
 
 type Size = "large" | "small";
@@ -17,7 +19,7 @@ const SIZE_LABEL: Record<Size, string> = { small: "Pequeño (14:9)", large: "Gra
 const SIZE_ASPECT: Record<Size, number> = { small: 14 / 9, large: 3 / 5 };
 const ACCEPT = "image/jpeg,image/png,image/gif,image/webp";
 
-export default function AdLibraryManager({ onToast }: Props) {
+export default function AdLibraryManager({ onToast, onImageAdded, onImageRemoved }: Props) {
   const [activeSize, setActiveSize] = useState<Size>("small");
   const [images, setImages]     = useState<AdLibraryImage[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -50,6 +52,7 @@ export default function AdLibraryManager({ onToast }: Props) {
       fd.append("size", activeSize);
       const image = await adLibraryApi.create(fd);
       setImages((prev) => [image, ...prev]);
+      onImageAdded?.(image);
       onToast("Imagen agregada", true);
     } catch (err) {
       onToast((err as Error).message, false);
@@ -63,6 +66,7 @@ export default function AdLibraryManager({ onToast }: Props) {
     try {
       await adLibraryApi.remove(id);
       setImages((prev) => prev.filter((img) => img.id !== id));
+      onImageRemoved?.(id);
       onToast("Imagen eliminada", true);
     } catch (err) {
       onToast((err as Error).message, false);
