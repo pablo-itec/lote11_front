@@ -44,6 +44,10 @@ const LINKS: Record<string, FooterLink[]> = {
     { label: "Términos de Uso", href: "/terminos" },
     { label: "Privacidad", href: "/privacidad" },
   ],
+  Desarrolladores: [
+    { label: "@matheosaliicio", href: "https://instagram.com/matheosaliicio", external: true },
+    { label: "@pablo_abat", href: "https://instagram.com/pablo_abat", external: true },
+  ],
 };
 
 const INSTAGRAMS = [
@@ -67,7 +71,7 @@ export default function Footer() {
           L11
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 mb-12 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 mb-12 relative z-10">
 
           {/* Marca + Contacto */}
           <div className="md:col-span-1">
