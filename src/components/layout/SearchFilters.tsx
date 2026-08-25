@@ -59,7 +59,7 @@ export default function SearchFilters({ topics, importanceLevels, onSearch, onTo
         <option value="">Toda importancia</option>
         {importanceLevels.map((l) => (
           <option key={l.id} value={l.id}>
-            Niv.{l.level} · {l.label}
+            {l.label}
           </option>
         ))}
       </select>

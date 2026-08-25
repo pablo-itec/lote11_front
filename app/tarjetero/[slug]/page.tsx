@@ -8,9 +8,12 @@ import { API_BASE } from "@/src/lib/api";
 import TarjeteroPersonCard from "@/src/components/layout/TarjeteroPersonCard";
 import SiteHeader from "@/src/components/layout/SiteHeader";
 
+// Sin cachear: los cambios del admin se ven al instante.
+export const dynamic = "force-dynamic";
+
 async function getGroup(slug: string): Promise<TarjeteroGroup | null> {
   try {
-    const res = await fetch(`${API_BASE}/tarjetero/slug/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}/tarjetero/slug/${slug}`, { cache: "no-store" });
     if (!res.ok) return null;
     return res.json();
   } catch {

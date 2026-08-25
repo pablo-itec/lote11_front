@@ -9,7 +9,7 @@ interface Props {
   onToast: (msg: string, ok: boolean) => void;
 }
 
-const EMPTY = { name: "", description: "", type: "separate" as "separate" | "grouped", priority: 1 };
+const EMPTY = { name: "", description: "", priority: 1 };
 
 export default function TopicsManager({ onToast }: Props) {
   const [list, setList]         = useState<Topic[]>([]);
@@ -34,14 +34,14 @@ export default function TopicsManager({ onToast }: Props) {
 
   const openEdit = (t: Topic) => {
     setEditingId(t.id);
-    setForm({ name: t.name, description: t.description ?? "", type: t.type, priority: t.priority });
+    setForm({ name: t.name, description: t.description ?? "", priority: t.priority });
     setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const data = { name: form.name, description: form.description || undefined, type: form.type, priority: +form.priority };
+    const data = { name: form.name, description: form.description || undefined, priority: +form.priority };
     try {
       if (editingId) {
         await topicsApi.update(editingId, data);
@@ -95,13 +95,6 @@ export default function TopicsManager({ onToast }: Props) {
               <input value={form.description} onChange={f("description")} className="glass-input" placeholder="Descripción breve" />
             </div>
             <div>
-              <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Tipo</label>
-              <select value={form.type} onChange={f("type")} className="glass-input">
-                <option value="separate">Separado</option>
-                <option value="grouped">Agrupado</option>
-              </select>
-            </div>
-            <div>
               <label className="text-[8px] font-bold tracking-[0.18em] uppercase text-brand-cream/30 block mb-1">Prioridad</label>
               <input type="number" min={1} value={form.priority} onChange={f("priority")} className="glass-input" />
             </div>
@@ -124,17 +117,12 @@ export default function TopicsManager({ onToast }: Props) {
           ) : (
             <table className="admin-table">
               <thead>
-                <tr><th>Nombre</th><th>Tipo</th><th>Descripción</th><th>Prioridad</th><th>Acciones</th></tr>
+                <tr><th>Nombre</th><th>Descripción</th><th>Prioridad</th><th>Acciones</th></tr>
               </thead>
               <tbody>
                 {list.map((t) => (
                   <tr key={t.id}>
                     <td className="font-medium text-brand-cream/70">{t.name}</td>
-                    <td>
-                      <span className={`abadge ${t.type === "grouped" ? "abadge-brown" : "abadge-gray"}`}>
-                        {t.type === "grouped" ? "Agrupado" : "Separado"}
-                      </span>
-                    </td>
                     <td className="text-[11px] max-w-[200px] truncate">{t.description ?? "—"}</td>
                     <td className="text-[11px]">{t.priority}</td>
                     <td>

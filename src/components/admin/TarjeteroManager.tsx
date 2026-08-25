@@ -9,6 +9,7 @@ import { tarjeteroApi } from "@/src/lib/api";
 import type { TarjeteroGroup, TarjeteroPerson, TarjeteroSection } from "@/src/types";
 import { imgSrc } from "@/src/lib/utils";
 import ImageCropperModal from "@/src/components/ui/ImageCropperModal";
+import { compressIfNeeded } from "@/src/lib/imageCompression";
 
 interface Props {
   onToast: (msg: string, ok: boolean) => void;
@@ -123,7 +124,7 @@ function GroupsPanel({
   const [form, setForm]           = useState({ ...EMPTY_GROUP });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [cropSrc, setCropSrc]     = useState("");
+  const [cropFile, setCropFile]   = useState<File | null>(null);
   const [saving, setSaving]       = useState(false);
   const fileRef                   = useRef<HTMLInputElement>(null);
 
@@ -155,14 +156,14 @@ function GroupsPanel({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCropSrc(URL.createObjectURL(file));
+    setCropFile(file);
     e.target.value = "";
   };
 
   const handleCropConfirm = (file: File) => {
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
-    setCropSrc("");
+    setCropFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -322,12 +323,12 @@ function GroupsPanel({
         </div>
       </div>
 
-      {cropSrc && (
+      {cropFile && (
         <ImageCropperModal
-          src={cropSrc}
+          file={cropFile}
           aspect={CROP_ASPECT_GROUP}
           onConfirm={handleCropConfirm}
-          onCancel={() => setCropSrc("")}
+          onCancel={() => setCropFile(null)}
         />
       )}
     </div>
@@ -377,11 +378,13 @@ function SectionsPanel({
     setShowForm(true);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setImageFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    const compressed = await compressIfNeeded(file);
+    setImageFile(compressed);
+    setPreviewUrl(URL.createObjectURL(compressed));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -540,7 +543,7 @@ function PeoplePanel({
   const [form, setForm]           = useState({ ...EMPTY_PERSON });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [cropSrc, setCropSrc]     = useState("");
+  const [cropFile, setCropFile]   = useState<File | null>(null);
   const [saving, setSaving]       = useState(false);
   const fileRef                   = useRef<HTMLInputElement>(null);
 
@@ -571,14 +574,14 @@ function PeoplePanel({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCropSrc(URL.createObjectURL(file));
+    setCropFile(file);
     e.target.value = "";
   };
 
   const handleCropConfirm = (file: File) => {
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
-    setCropSrc("");
+    setCropFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -665,12 +668,12 @@ function PeoplePanel({
                 <img src={previewUrl} alt="Preview" className="mt-2 rounded-full object-cover" style={{ width: 96, height: 96 }} />
               )}
             </div>
-            {cropSrc && (
+            {cropFile && (
               <ImageCropperModal
-                src={cropSrc}
+                file={cropFile}
                 aspect={CROP_ASPECT_PERSON}
                 onConfirm={handleCropConfirm}
-                onCancel={() => setCropSrc("")}
+                onCancel={() => setCropFile(null)}
               />
             )}
             <div className="sm:col-span-2 flex gap-3 pt-1">

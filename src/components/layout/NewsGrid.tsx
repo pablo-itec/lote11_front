@@ -68,7 +68,7 @@ function NewsCard({ news, onClick }: { news: News; onClick: () => void }) {
       <div className="p-5 flex flex-col flex-1">
         {news.importanceLevel && (
           <span className="kicker mb-2">
-            Niv.{news.importanceLevel.level} · {news.importanceLevel.label}
+            {news.importanceLevel.label}
           </span>
         )}
         <h3 className="font-serif text-[16px] font-bold text-brand-brown leading-snug mb-2 line-clamp-2">

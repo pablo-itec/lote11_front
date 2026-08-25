@@ -1,6 +1,8 @@
 "use client";
 // src/components/layout/Footer.tsx
 
+import Link from "next/link";
+
 const IconInstagram = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -26,10 +28,22 @@ const IconMapPin = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const LINKS = {
-  Contenido: ["Podcasts", "Noticias", "Tendencias", "Entrevistas", "Reportes"],
-  Empresa:   ["Nosotros", "Equipo Editorial", "Publicite Aquí", "Prensa"],
-  Legal:     ["Términos de Uso", "Privacidad", "Cookies", "Newsletter"],
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+const LINKS: Record<string, FooterLink[]> = {
+  Contenido: [
+    { label: "Inicio", href: "/" },
+    { label: "Podcasts", href: "https://www.youtube.com/@umdmpodcast/videos", external: true },
+    { label: "Tarjetero", href: "/tarjetero" },
+  ],
+  Legal: [
+    { label: "Términos de Uso", href: "/terminos" },
+    { label: "Privacidad", href: "/privacidad" },
+  ],
 };
 
 const INSTAGRAMS = [
@@ -53,7 +67,7 @@ export default function Footer() {
           L11
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 mb-12 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 mb-12 relative z-10">
 
           {/* Marca + Contacto */}
           <div className="md:col-span-1">
@@ -91,13 +105,24 @@ export default function Footer() {
               </p>
               <ul className="space-y-[10px]">
                 {links.map((l) => (
-                  <li key={l}>
-                    <a
-                      href="#"
-                      className="text-[12px] text-brand-cream/65 hover:text-brand-brown hover:translate-x-0.5 inline-block transition-all"
-                    >
-                      {l}
-                    </a>
+                  <li key={l.label}>
+                    {l.external ? (
+                      <a
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[12px] text-brand-cream/65 hover:text-brand-brown hover:translate-x-0.5 inline-block transition-all"
+                      >
+                        {l.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={l.href}
+                        className="text-[12px] text-brand-cream/65 hover:text-brand-brown hover:translate-x-0.5 inline-block transition-all"
+                      >
+                        {l.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -8,7 +8,7 @@ import SiteHeader from "@/src/components/layout/SiteHeader";
 
 async function getSections(): Promise<TarjeteroSection[]> {
   try {
-    const res = await fetch(`${API_BASE}/tarjetero/sections`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}/tarjetero/sections`, { cache: "no-store" });
     if (!res.ok) return [];
     return res.json();
   } catch {

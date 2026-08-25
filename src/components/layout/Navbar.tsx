@@ -9,7 +9,11 @@ interface NavbarProps {
   onProfileClick: () => void;
 }
 
-const NAV_LINKS = ["Inicio", "Podcasts", "Noticias", "Tendencias"];
+const NAV_LINKS = [
+  { label: "Inicio", href: "/" },
+  { label: "Podcasts", href: "https://www.youtube.com/@umdmpodcast/videos", external: true },
+  { label: "Tarjetero", href: "/tarjetero" },
+];
 const HIDE_THRESHOLD = 120;
 
 export default function Navbar({ onProfileClick }: NavbarProps) {
@@ -42,15 +46,27 @@ export default function Navbar({ onProfileClick }: NavbarProps) {
           scrolled ? "glass-panel-strong" : "glass-panel"
         } hidden md:flex flex-1 ${menuHeight} rounded-full items-center justify-center gap-8 transition-all duration-300`}
       >
-        {NAV_LINKS.map((link) => (
-          <a
-            key={link}
-            href="#"
-            className="text-[9px] font-bold tracking-[0.22em] text-brand-cream/65 uppercase hover:text-brand-brown transition-colors"
-          >
-            {link}
-          </a>
-        ))}
+        {NAV_LINKS.map((link) =>
+          link.external ? (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[9px] font-bold tracking-[0.22em] text-brand-cream/65 uppercase hover:text-brand-brown transition-colors"
+            >
+              {link.label}
+            </a>
+          ) : (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="text-[9px] font-bold tracking-[0.22em] text-brand-cream/65 uppercase hover:text-brand-brown transition-colors"
+            >
+              {link.label}
+            </Link>
+          ),
+        )}
       </nav>
 
       {/* ADMIN + PERFIL */}
