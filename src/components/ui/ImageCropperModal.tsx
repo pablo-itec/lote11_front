@@ -1,40 +1,22 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import { X, Check } from "lucide-react";
+import { exportImage } from "@/src/lib/imageCompression";
 
 interface Props {
-  src: string;
+  file: File;
   aspect: number;
   onConfirm: (file: File) => void;
   onCancel: () => void;
 }
 
-async function cropImageToFile(src: string, crop: Area): Promise<File> {
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const el = new Image();
-    el.onload = () => resolve(el);
-    el.onerror = reject;
-    el.src = src;
-  });
+export default function ImageCropperModal({ file, aspect, onConfirm, onCancel }: Props) {
+  const src = useMemo(() => URL.createObjectURL(file), [file]);
+  useEffect(() => () => URL.revokeObjectURL(src), [src]);
 
-  const canvas = document.createElement("canvas");
-  canvas.width = crop.width;
-  canvas.height = crop.height;
-  canvas.getContext("2d")!.drawImage(
-    img,
-    crop.x, crop.y, crop.width, crop.height,
-    0, 0, crop.width, crop.height,
-  );
-
-  return new Promise((resolve) =>
-    canvas.toBlob((blob) => resolve(new File([blob!], "cropped.jpg", { type: "image/jpeg" })), "image/jpeg", 0.92),
-  );
-}
-
-export default function ImageCropperModal({ src, aspect, onConfirm, onCancel }: Props) {
   const [crop, setCrop]           = useState({ x: 0, y: 0 });
   const [zoom, setZoom]           = useState(1);
   const [croppedArea, setCroppedArea] = useState<Area | null>(null);
@@ -48,8 +30,8 @@ export default function ImageCropperModal({ src, aspect, onConfirm, onCancel }: 
     if (!croppedArea) return;
     setSaving(true);
     try {
-      const file = await cropImageToFile(src, croppedArea);
-      onConfirm(file);
+      const cropped = await exportImage(src, file.size, croppedArea);
+      onConfirm(cropped);
     } finally {
       setSaving(false);
     }

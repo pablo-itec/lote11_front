@@ -29,7 +29,7 @@ export default function CoversManager({ onToast }: Props) {
   const [form, setForm] = useState({ ...EMPTY });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [cropSrc, setCropSrc] = useState("");
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -74,14 +74,14 @@ export default function CoversManager({ onToast }: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCropSrc(URL.createObjectURL(file));
+    setCropFile(file);
     e.target.value = "";
   };
 
   const handleCropConfirm = (file: File) => {
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
-    setCropSrc("");
+    setCropFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -357,12 +357,12 @@ export default function CoversManager({ onToast }: Props) {
         </div>
       </div>
 
-      {cropSrc && (
+      {cropFile && (
         <ImageCropperModal
-          src={cropSrc}
+          file={cropFile}
           aspect={CROP_ASPECT}
           onConfirm={handleCropConfirm}
-          onCancel={() => setCropSrc("")}
+          onCancel={() => setCropFile(null)}
         />
       )}
     </div>

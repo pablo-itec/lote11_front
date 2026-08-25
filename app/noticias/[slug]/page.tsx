@@ -6,10 +6,14 @@ import { fmt, newsSlides } from "@/src/lib/utils";
 import { API_BASE } from "@/src/lib/api";
 import NewsImageCarousel from "@/src/components/layout/NewsImageCarousel";
 
+// Sin cachear: los cambios del admin se ven al instante (a costa de una consulta
+// al backend por cada visita a la noticia).
+export const dynamic = "force-dynamic";
+
 async function getNews(slug: string): Promise<News | null> {
   try {
     const res = await fetch(`${API_BASE}/news/slug/${slug}`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!res.ok) return null;
     return res.json();
@@ -54,7 +58,7 @@ export default async function NewsPage({
               )}
               {news.importanceLevel && (
                 <span className="abadge abadge-red">
-                  Niv.{news.importanceLevel.level} · {news.importanceLevel.label}
+                  {news.importanceLevel.label}
                 </span>
               )}
               {news.topic && (

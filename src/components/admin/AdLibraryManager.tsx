@@ -22,7 +22,7 @@ export default function AdLibraryManager({ onToast }: Props) {
   const [images, setImages]     = useState<AdLibraryImage[]>([]);
   const [loading, setLoading]   = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [cropSrc, setCropSrc]   = useState("");
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const fileRef                 = useRef<HTMLInputElement>(null);
 
   const load = async (size: Size) => {
@@ -38,11 +38,11 @@ export default function AdLibraryManager({ onToast }: Props) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    setCropSrc(URL.createObjectURL(file));
+    setCropFile(file);
   };
 
   const handleCropConfirm = async (file: File) => {
-    setCropSrc("");
+    setCropFile(null);
     setUploading(true);
     try {
       const fd = new FormData();
@@ -144,12 +144,12 @@ export default function AdLibraryManager({ onToast }: Props) {
         )}
       </div>
 
-      {cropSrc && (
+      {cropFile && (
         <ImageCropperModal
-          src={cropSrc}
+          file={cropFile}
           aspect={SIZE_ASPECT[activeSize]}
           onConfirm={handleCropConfirm}
-          onCancel={() => setCropSrc("")}
+          onCancel={() => setCropFile(null)}
         />
       )}
     </div>

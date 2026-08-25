@@ -101,7 +101,14 @@ export default function HeroSection({ news, onReadMore }: Props) {
         </p>
         <div className="flex gap-3 flex-wrap">
           <LiquidButton variant="primary">Explorar →</LiquidButton>
-          <LiquidButton variant="ghost">Ver Podcast</LiquidButton>
+          <LiquidButton
+            variant="ghost"
+            href="https://www.youtube.com/@umdmpodcast/videos"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ver Podcast
+          </LiquidButton>
         </div>
       </motion.div>
 

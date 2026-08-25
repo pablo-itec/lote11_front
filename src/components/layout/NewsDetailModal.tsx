@@ -66,7 +66,7 @@ export default function NewsDetailModal({ news, onClose }: Props) {
                 )}
                 {news.importanceLevel && (
                   <span className="abadge abadge-red">
-                    Niv.{news.importanceLevel.level} · {news.importanceLevel.label}
+                    {news.importanceLevel.label}
                   </span>
                 )}
                 {news.topic && (

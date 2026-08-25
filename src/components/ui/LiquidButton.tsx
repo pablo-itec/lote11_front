@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 interface Props {
   children: React.ReactNode;
   href?: string;
+  target?: string;
+  rel?: string;
   onClick?: () => void;
   variant?: "primary" | "ghost";
   className?: string;
@@ -14,6 +16,8 @@ interface Props {
 export default function LiquidButton({
   children,
   href = "#",
+  target,
+  rel,
   onClick,
   variant = "primary",
   className = "",
@@ -30,6 +34,8 @@ export default function LiquidButton({
   return (
     <motion.a
       href={href}
+      target={target}
+      rel={rel}
       onClick={onClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.96 }}

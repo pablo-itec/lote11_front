@@ -6,9 +6,13 @@ import { Plus, X, Trash2 } from "lucide-react";
 import { newsApi, topicsApi, importanceApi } from "@/src/lib/api";
 import { imgSrc, fmt } from "@/src/lib/utils";
 import type { News, NewsImage, Topic, ImportanceLevel } from "@/src/types";
+import ImageCropperModal from "@/src/components/ui/ImageCropperModal";
 
 const MAX_GALLERY_IMAGES = 10;
 const MAX_TOTAL_IMAGES = MAX_GALLERY_IMAGES + 1; // portada + galería
+
+// Formato de portada/galería de noticia: horizontal, tipo banner/hero.
+const NEWS_CROP_ASPECT = 16 / 9;
 
 interface StagedImage {
   file: File;
@@ -44,6 +48,11 @@ export default function NewsManager({ onToast }: Props) {
   const [galleryUploading, setGalleryUploading] = useState(false);
   const galleryFileRef = useRef<HTMLInputElement>(null);
 
+  // Cola de recorte manual: cada archivo elegido (portada o galería, incluso en selección
+  // múltiple) pasa por el modal de recorte 16:9 antes de subirse, uno a la vez.
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropResults, setCropResults] = useState<File[]>([]);
+
   const load = async () => {
     setLoading(true);
     try {
@@ -71,8 +80,14 @@ export default function NewsManager({ onToast }: Props) {
     });
   };
 
+  const resetCropQueue = () => {
+    setCropQueue([]);
+    setCropResults([]);
+  };
+
   const closeForm = () => {
     resetStagedGallery();
+    resetCropQueue();
     setShowForm(false);
   };
 
@@ -82,6 +97,7 @@ export default function NewsManager({ onToast }: Props) {
     setCoverUrl(null);
     setGalleryImages([]);
     resetStagedGallery();
+    resetCropQueue();
     setShowForm(true);
   };
 
@@ -103,6 +119,7 @@ export default function NewsManager({ onToast }: Props) {
     setCoverUrl(n.imageUrl ?? null);
     setGalleryImages(n.images ?? []);
     resetStagedGallery();
+    resetCropQueue();
     setShowForm(true);
   };
 
@@ -155,15 +172,38 @@ export default function NewsManager({ onToast }: Props) {
     }
   };
 
-  const handleGalleryFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    e.target.value = "";
-    await handleGalleryFiles(files);
+  // Encola los archivos elegidos para pasar por el recorte manual antes de subirlos.
+  const startCropQueue = (files: File[]) => {
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+    if (imageFiles.length === 0) return;
+    setCropQueue(imageFiles);
+    setCropResults([]);
   };
 
-  const handleGalleryDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+  const advanceCropQueue = (results: File[]) => {
+    const [, ...rest] = cropQueue;
+    if (rest.length > 0) {
+      setCropQueue(rest);
+      setCropResults(results);
+    } else {
+      setCropQueue([]);
+      setCropResults([]);
+      if (results.length > 0) void handleGalleryFiles(results);
+    }
+  };
+
+  const handleCropConfirm = (file: File) => advanceCropQueue([...cropResults, file]);
+  const handleCropCancel = () => advanceCropQueue(cropResults);
+
+  const handleGalleryFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    startCropQueue(files);
+  };
+
+  const handleGalleryDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    await handleGalleryFiles(Array.from(e.dataTransfer.files));
+    startCropQueue(Array.from(e.dataTransfer.files));
   };
 
   const handleRemoveGalleryImage = async (imageId: number) => {
@@ -481,6 +521,15 @@ export default function NewsManager({ onToast }: Props) {
           )}
         </div>
       </div>
+
+      {cropQueue.length > 0 && (
+        <ImageCropperModal
+          file={cropQueue[0]}
+          aspect={NEWS_CROP_ASPECT}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 }
