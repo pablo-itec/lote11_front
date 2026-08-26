@@ -52,7 +52,7 @@ const LINKS: Record<string, FooterLink[]> = {
 
 const INSTAGRAMS = [
   { handle: "@lote11.ar", url: "https://instagram.com/lote11.ar" },
-  { handle: "@consultoratierraylimon", url: "https://instagram.com/consultoratierraylimon" },
+  { handle: "@umdm_podcast", url: "https://instagram.com/umdm_podcast" },
 ];
 
 const PHONE = "3584820474";
