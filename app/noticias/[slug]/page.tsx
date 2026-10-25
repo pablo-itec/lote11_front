@@ -6,20 +6,27 @@ import { fmt, newsSlides } from "@/src/lib/utils";
 import { API_BASE } from "@/src/lib/api";
 import NewsImageCarousel from "@/src/components/layout/NewsImageCarousel";
 
-// Sin cachear: los cambios del admin se ven al instante (a costa de una consulta
-// al backend por cada visita a la noticia).
-export const dynamic = "force-dynamic";
+// ISR: cada noticia se renderiza la primera vez que se visita y queda cacheada; pasados
+// 30 s, la siguiente visita recibe la versión cacheada mientras se regenera en segundo
+// plano (mismo criterio que la caché CDN de los GET públicos del back). Así una visita
+// no espera ni el render ni un arranque en frío del back.
+export const revalidate = 30;
+
+// Lista vacía: no se prerenderiza nada en el build (no hay fetch al back durante el
+// build); todas las noticias se generan on-demand. Requerido para que aplique el ISR.
+export async function generateStaticParams() {
+  return [];
+}
 
 async function getNews(slug: string): Promise<News | null> {
-  try {
-    const res = await fetch(`${API_BASE}/news/slug/${slug}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
+  const res = await fetch(`${API_BASE}/news/slug/${slug}`, {
+    next: { revalidate: 30 },
+  });
+  if (res.status === 404) return null;
+  // Otros errores se propagan (en vez de un 404): así una falla momentánea del back no
+  // queda cacheada como "no encontrada" y el ISR sigue sirviendo la última versión buena.
+  if (!res.ok) throw new Error(`Error ${res.status} al cargar la noticia "${slug}"`);
+  return res.json();
 }
 
 export default async function NewsPage({
