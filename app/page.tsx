@@ -15,8 +15,8 @@ import Footer           from "@/src/components/layout/Footer";
 import AdSidebar        from "@/src/components/ads/AdSidebar";
 import LogoBanner       from "@/src/components/layout/LogoBanner";
 
-import { newsApi, topicsApi, importanceApi } from "@/src/lib/api";
-import type { News, Topic, ImportanceLevel } from "@/src/types";
+import { newsApi, topicsApi, importanceApi, adsApi } from "@/src/lib/api";
+import type { News, Topic, ImportanceLevel, Ad } from "@/src/types";
 
 const PAGE_LIMIT = 9;
 
@@ -40,11 +40,18 @@ export default function Home() {
   const [topics, setTopics]               = useState<Topic[]>([]);
   const [importanceLevels, setImportanceLevels] = useState<ImportanceLevel[]>([]);
 
-  // Load topics + importance levels once
+  // Ads: se piden una sola vez acá y se comparten entre el rail fijo y el fallback inline
+  // (antes cada AdSidebar hacía su propio fetch: 4 requests en vez de 2).
+  const [leftAds, setLeftAds]   = useState<Ad[]>([]);
+  const [rightAds, setRightAds] = useState<Ad[]>([]);
+
+  // Load topics + importance levels + ads once
   useEffect(() => {
     Promise.all([topicsApi.getAll(), importanceApi.getAll()])
       .then(([t, i]) => { setTopics(t); setImportanceLevels(i); })
       .catch(() => {});
+    adsApi.getBySide("left").then((a) => setLeftAds(Array.isArray(a) ? a : [])).catch(() => {});
+    adsApi.getBySide("right").then((a) => setRightAds(Array.isArray(a) ? a : [])).catch(() => {});
   }, []);
 
   const loadNews = useCallback(async () => {
@@ -72,18 +79,28 @@ export default function Home() {
 
   useEffect(() => { loadNews(); }, [loadNews]);
 
-  const openDetail = async (id: number) => {
-    try {
-      const n = await newsApi.getDetail(id);
-      setSelectedNews(n);
-    } catch { /* ignore */ }
+  // El modal abre al instante con lo que ya trae el listado (título, cuerpo, portada...);
+  // la galería de imágenes solo viene en el detalle, así que se completa cuando responde.
+  const openDetail = (id: number) => {
+    const fromList = newsList.find((n) => n.id === id);
+    if (fromList) setSelectedNews(fromList);
+    newsApi
+      .getDetail(id)
+      .then((full) =>
+        setSelectedNews((current) => {
+          if (!fromList) return full;
+          // Si mientras tanto se cerró el modal o se abrió otra noticia, no lo pisamos.
+          return current?.id === id ? full : current;
+        }),
+      )
+      .catch(() => { /* ignore: se queda con los datos del listado */ });
   };
 
   const handleSearch = (s: string) => { setSearch(s); setPage(1); };
   const handleTopic  = (t: string) => { setTopicId(t); setPage(1); };
   const handleImp    = (i: string) => { setImportanceId(i); setPage(1); };
 
-  // Side rails: fijos en pantalla pero chocan contra el footer (no lo tapan)
+  // Side rails: fluyen con el scroll y se anclan arriba del footer (no lo tapan)
   const footerRef = useRef<HTMLDivElement>(null);
   const leftRailRef = useRef<HTMLDivElement>(null);
   const rightRailRef = useRef<HTMLDivElement>(null);
@@ -98,10 +115,19 @@ export default function Home() {
     const compute = () => {
       const footer = footerRef.current?.getBoundingClientRect();
       if (!footer) return;
+      const scrollY = window.scrollY;
       const leftH = leftRailRef.current?.offsetHeight ?? 0;
       const rightH = rightRailRef.current?.offsetHeight ?? 0;
-      setLeftTop(Math.min(BASE_TOP, footer.top - leftH - GAP));
-      setRightTop(Math.min(BASE_TOP, footer.top - rightH - GAP));
+
+      // Mientras el footer está lejos, el rail fluye 1:1 con el scroll (baja/sube junto
+      // con las noticias, como cualquier otro bloque de la página). Recién cuando el
+      // footer se acerca lo suficiente como para que se solaparía si se quedara quieto
+      // en BASE_TOP, se ancla ahí y lo va esquivando.
+      const flowTop = BASE_TOP - scrollY;
+      const footerLimitLeft = footer.top - leftH - GAP;
+      const footerLimitRight = footer.top - rightH - GAP;
+      setLeftTop(footerLimitLeft < BASE_TOP ? footerLimitLeft : flowTop);
+      setRightTop(footerLimitRight < BASE_TOP ? footerLimitRight : flowTop);
     };
 
     const onScroll = () => {
@@ -147,7 +173,7 @@ export default function Home() {
         aria-label="Publicidad lateral izquierda"
       >
         <div ref={leftRailRef}>
-          <AdSidebar side="left" />
+          <AdSidebar ads={leftAds} />
         </div>
       </aside>
       <aside
@@ -156,7 +182,7 @@ export default function Home() {
         aria-label="Publicidad lateral derecha"
       >
         <div ref={rightRailRef}>
-          <AdSidebar side="right" />
+          <AdSidebar ads={rightAds} />
         </div>
       </aside>
 
@@ -192,8 +218,8 @@ export default function Home() {
 
         {/* Fallback de ads en pantallas chicas (< 1400px) */}
         <div className="min-[1280px]:hidden grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-          <AdSidebar side="left" />
-          <AdSidebar side="right" />
+          <AdSidebar ads={leftAds} />
+          <AdSidebar ads={rightAds} />
         </div>
       </div>
 
